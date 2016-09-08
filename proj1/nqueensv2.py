@@ -1,5 +1,29 @@
 import time
 
+class BoardInvalidError(Exception):
+    """Exception raised if input board is in a state of attack."""
+    pass
+
+class BoardSizeError(Exception):
+    """Exception raised if input board size doesn't match with input size"""
+    pass
+
+"""Converts board input to format understood by the program."""
+def inputBoardProcessing(board):
+	board = board.split(' ')
+	for i in range(len(board)):
+		board[i] = int(board[i])-1
+	return board
+
+"""Requests size and board information from user."""
+def requestBoardInput():
+    print("N Queens Solver 0.1.1\nbrought to you by Harald Husum")
+    size = int(input(">> "))
+    board = inputBoardProcessing(input(">> "))
+    if size != len(board):
+        raise BoardSizeError()
+    return board
+
 """Returns the index of the first column that has not been determined by
 user. If the board is filled, -1 is returned."""
 def startColumn(size, board):
@@ -31,31 +55,24 @@ def locationStates(size, board, diagCoords):
     for col in range(size):
         row = board[col]
         if row != -1:
-            if locState[0][row]:
+            if locStates[0][row]:
                 #marking row as under attack
-                locState[0][row] = False
+                locStates[0][row] = False
             else:
                 raise BoardInvalidError()
             
-            if locState[1][diagCoords[col][row][0]]:
+            if locStates[1][diagCoords[col][row][0]]:
                 #marking NW to SE diagonal as under attack
-                locState[1][diagCoords[col][row][0]] = False
+                locStates[1][diagCoords[col][row][0]] = False
             else:
                 raise BoardInvalidError()
             
-            if locState[2][diagCoords[col][row][1]]:
+            if locStates[2][diagCoords[col][row][1]]:
                 #marking SW to NE diagonal as under attack
-                locState[2][diagCoords[col][row][1]] = False
+                locStates[2][diagCoords[col][row][1]] = False
             else:
                 raise BoardInvalidError()
     return locStates
-
-def canPlace(col, row, diagCoords, locStates):
-    if(locStates[0][row]
-    and locStates[1][diagCoords[col][row][0]]
-    and locStates[2][diagCoords[col][row][1]]):
-        return True
-    return False
 
 def nQueensRecBack(size, col, board, diagCoords, locStates, solutions):
     """This is the recursion base case. The board has been filled, and thus we
@@ -64,8 +81,8 @@ def nQueensRecBack(size, col, board, diagCoords, locStates, solutions):
     case saves the solution to a list, and returns True to indicate a valid
     solution has been found."""
     if col >= size:
+        #collects solution in a list, could alternatively print the solution
         solutions.append(board[:])
-        #could alternatively print the solution
         return True
     
     """If the board is not filled, we try out every row position in the
@@ -73,7 +90,10 @@ def nQueensRecBack(size, col, board, diagCoords, locStates, solutions):
     found. foundSolution will be set to true if a valid solution is found."""
     foundSolution = False
     for row in range(size): #could i implement row check here?
-        if canPlace(col, row, diagCoords, locStates):
+        #checking availability of row and diagonals
+        if (locStates[0][row]
+        and locStates[1][diagCoords[col][row][0]]
+        and locStates[2][diagCoords[col][row][1]]):
             #placing queen
             board[col]=row
             #marking row as under attack
@@ -107,8 +127,14 @@ def solutionPrint(solution):
     
 
 def main():
-    size = 14
-    board = [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1]
+    try:
+        board = requestBoardInput()
+    except BoardSizeError:
+        print("Error: Board size mismatch")
+        return
+    size = len(board)
+    #size = 14
+    #board = [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1]
     
     #initiate timing
     start = time.clock()
@@ -127,7 +153,7 @@ def main():
         locStates = locationStates(size, board, diagCoords)
     except BoardInvalidError:
         print("Error: Board configuration invalid")
-        #break
+        return
     
     """soltions is a holding list for valid board states discovered along the
     way. It is passes as an argument to the recursive backtrack function, to
@@ -142,11 +168,11 @@ def main():
         for solution in solutions:
             solutionPrint(solution)
         # print number of solutions
-    	print("\nSolutions found: "+str(len(solutions)))
+        print("\nSolutions found: "+str(len(solutions)))
         #print timing
-    	print("Runtime: "+str(end - start)+" seconds\n")
+        print("Runtime: "+str(end - start)+" seconds\n")
     else:
-        print("Error: No valid solution exists\n")
+        print("Error: No valid solution exists")
         #terminate timing
         end = time.clock()
 
