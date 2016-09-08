@@ -1,4 +1,4 @@
-import time
+import time, multiprocessing, copy
 
 class BoardInvalidError(Exception):
     """Exception raised if input board is in a state of attack."""
@@ -7,6 +7,14 @@ class BoardInvalidError(Exception):
 class BoardSizeError(Exception):
     """Exception raised if input board size doesn't match with input size"""
     pass
+
+def threadToggle():
+    print("N Queens Solver 0.1.1\nbrought to you by Harald Husum")
+    threading = input("Multithreading [y/n]: ")
+    if threading == "y":
+        return True
+    else:
+        return False
 
 """Converts board input to format understood by the program."""
 def inputBoardProcessing(board):
@@ -17,9 +25,9 @@ def inputBoardProcessing(board):
 
 """Requests size and board information from user."""
 def requestBoardInput():
-    print("N Queens Solver 0.1.1\nbrought to you by Harald Husum")
     size = int(input(">> "))
     board = inputBoardProcessing(input(">> "))
+    print("")
     if size != len(board):
         raise BoardSizeError()
     return board
@@ -116,6 +124,54 @@ def nQueensRecBack(size, col, board, diagCoords, locStates, solutions):
     been found deeper in the tree. It is passed down the call tree."""
     return foundSolution
 
+def threadedNQueensRecBack(size, col, board, diagCoords, locStates, solutions):
+    if col >= size:
+        solutions.append(board[:])
+        return True
+    
+    if __name__ == '__main__':
+        with multiprocessing.Manager() as manager:
+            foundSolutions = []
+            processes = []
+            for row in range(size):
+                if (locStates[0][row]
+                and locStates[1][diagCoords[col][row][0]]
+                and locStates[2][diagCoords[col][row][1]]):
+                    board[col]=row
+                    locStates[0][row] = False
+                    locStates[1][diagCoords[col][row][0]] = False
+                    locStates[2][diagCoords[col][row][1]] = False
+            
+                    processSolutions = manager.list()
+                    foundSolutions.append(processSolutions)
+                    processes.append(multiprocessing.Process(target=nQueensRecBack, args=(size, col+1, board[:], copy.deepcopy(diagCoords), copy.deepcopy(locStates[:]), processSolutions)))
+            
+                    board[col]=-1 #removing queen
+                    locStates[0][row] = True #freeing row
+                    locStates[1][diagCoords[col][row][0]] = True #freeing nw diagonal
+                    locStates[2][diagCoords[col][row][1]] = True #freeing sw diagonal
+    
+            for process in processes:
+                process.start()
+            
+            for process in processes:
+                process.join()
+    
+            foundSolution = False
+            for processSolutions in foundSolutions:
+                if processSolutions != []:
+                    foundSolution = True
+                    for solution in processSolutions:
+                        solutions.append(solution)
+    
+    return foundSolution
+    
+    
+    
+    """At this point returnValue is indicative of whether a valid solution has
+    been found deeper in the tree. It is passed down the call tree."""
+    return foundSolution
+
 """Helper procedure for solution printing"""
 def solutionPrint(solution):
     #change to 1 indexing for readability while also formating for print
@@ -127,17 +183,16 @@ def solutionPrint(solution):
     
 
 def main():
+    threading = threadToggle()
     try:
         board = requestBoardInput()
     except BoardSizeError:
         print("Error: Board size mismatch")
         return
     size = len(board)
-    #size = 14
-    #board = [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1]
     
     #initiate timing
-    start = time.clock()
+    start = time.time()
     
     """Fetching the number of the first non-specified column"""
     startCol = startColumn(size, board)
@@ -161,9 +216,14 @@ def main():
     solutions = []
     
     """Initiate recursive backtrack solver procedure"""
-    if nQueensRecBack(size, startCol, board, diagCoords, locStates, solutions):
+    result = False
+    if threading:
+        result = threadedNQueensRecBack(size, startCol, board, diagCoords, locStates, solutions)
+    else:
+        result = nQueensRecBack(size, startCol, board, diagCoords, locStates, solutions)
+    if result:
         #terminate timing
-        end = time.clock()
+        end = time.time()
         # print solutions
         for solution in solutions:
             solutionPrint(solution)
@@ -173,7 +233,5 @@ def main():
         print("Runtime: "+str(end - start)+" seconds\n")
     else:
         print("Error: No valid solution exists")
-        #terminate timing
-        end = time.clock()
 
 main()
