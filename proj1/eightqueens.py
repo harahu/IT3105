@@ -62,4 +62,5 @@ def main():
 		print("\nRuntime:")
 		print(str(end - start)+" seconds")
 
-main()
+if __name__ == '__main__':
+    main()

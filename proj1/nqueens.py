@@ -234,4 +234,6 @@ def main():
     else:
         print("Error: No valid solution exists")
 
-main()
+
+if __name__ == '__main__':
+    main()
