@@ -1,13 +1,13 @@
 
 
-class problemState():
+class ProblemState():
     """Contains information dependent on problem size to be looked up.
     Should not be changed after initialization."""
     def __init__(self, size):
         self.size = size
-        self.comb = problemState.nC2List(size + 1)
+        self.comb = ProblemState.nC2List(size + 1)
         self.target = self.comb[size]
-        self.diagCoords = problemState.diagonalCoordinates(size)
+        self.diagCoords = ProblemState.diagonalCoordinates(size)
 
     def nC2List(n):
         """List of n choose 2 from 0 to n"""
@@ -30,7 +30,7 @@ class problemState():
                 diagCoords[col][row][1] = col + row
         return diagCoords
 
-class boardState():
+class BoardState():
     def __init__(self, pS, **kwargs):
         self.pS = pS
         self.board = kwargs.get('board')
@@ -56,17 +56,35 @@ class boardState():
             for line in locList:
                     self.energy -= self.pS.comb[line]
 
-    def neighbour(self):
-        col = random.randint(0, self.pS.size-1)
-        row = random.randint(0, self.pS.size-1)
-        newBoard = self.board[:]
-        newBoard[col] = row
-        neighbour = boardState(self.pS, board=newBoard)
-        return neighbour
+    def neighbourhood(self):
+        """Returns a list of neighbours"""
+        temp = []
+        neighbours = []
+        # get neighbours by moving queen to each row in columns
+        for col in range(self.pS.size):
+            for row in range(self.board[col]+1):
+                temp = self.board[:]
+                temp[col] = row
+                neighbours.append(BoardState(self.pS, board=temp))
+            for row in range(self.board[col]+1, self.board.size):
+                temp = self.board[:]
+                temp[col] = row
+                neighbours.append(BoardState(self.pS, board=temp))
         
+        return neighbours
+        
+class TabuState():
+    """Contains functions and memory for tabu search"""
+    def __init__(self):
+        pass
+
 
 def main():
-    pass
+    startBoard = [i for i in range(10)]
+    
+    pS = ProblemState(len(startBoard))
+    
+    
 
 
 if __name__ == '__main__':
