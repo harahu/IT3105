@@ -1,3 +1,5 @@
+import random
+
 class problemState():
     """Contains information dependent on problem size to be looked up.
     Should not be changed after initialization."""
@@ -76,17 +78,33 @@ def initializePopulation(bS, pS):
         	derivative[col] = row
         population.append(boardState(pS, board=derivative))
     return population
-def 
 
-def chooseParents(population):
-	number = 30
+def rouletteWheelSelection(population, pointers):
+    keep = []
+    for p in pointers:
+        i = 0
+        fSum = 0
+        while fSum < p:
+            fSum+=population[i].energy
+            i++
+        keep.append(population[i])
+    return keep
 
+
+def stocasticUniversalSampling(population, n):
+    f = 0
+    for individual in population:
+        f += individual.energy
+    pD = f/n
+    sP = random.randint(0, pD)
+    pointers = [(sP + i*pD) for i in range(n-1)]
+    return rouletteWheelSelection(population, pointers)
 
 def nQueensGenAlg(initPop, itr):
     population = initPop
     solutions = []
     for i in range(itr):
-        parents = chooseParents(population)
+        parents = stocasticUniversalSampling(population, 30)
         children = mutate(reproduce(parents))
         population = selectFromPopulations(parents, children)
         for individual in population:
