@@ -66,13 +66,16 @@ class boardState():
                 temp = self.board[:]
                 temp[col] = row
                 neighbours.append(boardState(self.pS, board=temp))
-            for row in range(self.board[col]+1, solf.board.size):
+            for row in range(self.board[col]+1, self.board.size):
                 temp = self.board[:]
                 temp[col] = row
                 neighbours.append(boardState(self.pS, board=temp))
         
         return neighbours
         
+class tabooState():
+    def __init__(self, pS
+
 
 def main():
     pass
