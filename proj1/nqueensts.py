@@ -56,13 +56,22 @@ class boardState():
             for line in locList:
                     self.energy -= self.pS.comb[line]
 
-    def neighbour(self):
-        col = random.randint(0, self.pS.size-1)
-        row = random.randint(0, self.pS.size-1)
-        newBoard = self.board[:]
-        newBoard[col] = row
-        neighbour = boardState(self.pS, board=newBoard)
-        return neighbour
+    def neighbourhood(self):
+        """Returns a list of neighbours"""
+        temp = []
+        neighbours = []
+        # get neighbours by moving queen to each row in columns
+        for col in range(self.pS.size):
+            for row in range(self.board[col]+1):
+                temp = self.board[:]
+                temp[col] = row
+                neighbours.append(boardState(self.pS, board=temp))
+            for row in range(self.board[col]+1, solf.board.size):
+                temp = self.board[:]
+                temp[col] = row
+                neighbours.append(boardState(self.pS, board=temp))
+        
+        return neighbours
         
 
 def main():
