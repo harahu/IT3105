@@ -30,6 +30,40 @@ class problemState():
                 diagCoords[col][row][1] = col + row
         return diagCoords
 
+class boardState():
+    def __init__(self, pS, **kwargs):
+        self.pS = pS
+        self.board = kwargs.get('board')
+        if self.board is not None:
+            self.locationStates()
+            self.energy()
+            self.req = 0
+
+    def locationStates(self):
+        """Returns a lookup table for number of queens in diagonals and horizontals"""
+        self.locStates = [[0 for i in range(self.pS.size)], [0 for i in range(2 * self.pS.size - 1)], [0 for i in range(2 * self.pS.size - 1)]]
+        for col in range(self.pS.size):
+            row = self.board[col]
+            self.locStates[0][row] += 1
+            #marking NW to SE diagonal as under attack
+            self.locStates[1][self.pS.diagCoords[col][row][0]] += 1
+            #marking SW to NE diagonal as under attack
+            self.locStates[2][self.pS.diagCoords[col][row][1]] += 1
+
+    def energy(self):
+        self.energy = self.pS.target
+        for locList in self.locStates:
+            for line in locList:
+                    self.energy -= self.pS.comb[line]
+
+    def neighbour(self):
+        col = random.randint(0, self.pS.size-1)
+        row = random.randint(0, self.pS.size-1)
+        newBoard = self.board[:]
+        newBoard[col] = row
+        neighbour = boardState(self.pS, board=newBoard)
+        return neighbour
+        
 
 def main():
     pass
