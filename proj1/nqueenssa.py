@@ -35,7 +35,7 @@ class boardState():
         self.pS = pS
         self.board = kwargs.get('board')
         if self.board is not None:
-            self.locationStates();
+            self.locationStates()
             self.energy()
             self.req = 0
         else:
@@ -43,7 +43,7 @@ class boardState():
             self.change = kwargs.get('change')
 
     def locationStates(self):
-        """Returns a lookup table for number of queens in a given diagonal"""
+        """Returns a lookup table for number of queens in diagonals and horizontals"""
         self.locStates = [[0 for i in range(self.pS.size)], [0 for i in range(2 * self.pS.size - 1)], [0 for i in range(2 * self.pS.size - 1)]]
         for col in range(self.pS.size):
             row = self.board[col]
