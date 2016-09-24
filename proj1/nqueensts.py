@@ -1,4 +1,4 @@
-
+import math, random, time
 
 class ProblemState():
     """Contains information dependent on problem size to be looked up.
@@ -56,34 +56,46 @@ class BoardState():
             for line in locList:
                     self.energy -= self.pS.comb[line]
 
-    def neighbourhood(self):
+    def neighbours(self):
         """Returns a list of neighbours"""
         temp = []
-        neighbours = []
+        nb = []
         # get neighbours by moving queen to each row in columns
         for col in range(self.pS.size):
             for row in range(self.board[col]+1):
                 temp = self.board[:]
                 temp[col] = row
-                neighbours.append(BoardState(self.pS, board=temp))
+                nb.append(BoardState(self.pS, board=temp))
             for row in range(self.board[col]+1, self.board.size):
                 temp = self.board[:]
                 temp[col] = row
-                neighbours.append(BoardState(self.pS, board=temp))
+                nb.append(BoardState(self.pS, board=temp))
         
-        return neighbours
+        return nb
         
 class TabuState():
     """Contains functions and memory for tabu search"""
     def __init__(self):
         pass
 
+def nQueensTabuSearch(pS, bS, tS, iterations):
+    neighbours = bS.neigbours()
+    
+    
 
 def main():
     startBoard = [i for i in range(10)]
     
     pS = ProblemState(len(startBoard))
+    bS = BoardState(pS)
+    tS = TabuState()
     
+    startTime = time.clock()
+    solutions = nQueensTabuSearch(pS, bS, tS, 1000)
+    endTime = time.clock()
+    
+    print("Runtime: "+str(endTime - startTime)+" seconds\n")
+    print(solutions)
     
 
 
