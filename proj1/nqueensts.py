@@ -73,8 +73,10 @@ class boardState():
         
         return neighbours
         
-class tabooState():
-    def __init__(self, pS
+class tabuState():
+    """Contains functions and memory for tabu search"""
+    def __init__(self):
+        pass
 
 
 def main():
