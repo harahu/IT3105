@@ -81,6 +81,15 @@ class TabuState():
 def nQueensTabuSearch(pS, bS, tS, iterations):
     neighbours = bS.neigbours()
     
+    # Find best neighbour
+    curBest = 0
+    bestBoard = None
+    for neighbour in bS.neighbours():
+        tempEnergy = neighbour.energy()
+        if curBest > tempEnergy:
+            curBest = tempEnergy
+            bestBoard = neighbour
+    
     
 
 def main():
