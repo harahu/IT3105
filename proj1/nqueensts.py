@@ -66,7 +66,7 @@ class BoardState():
                 temp = self.board[:]
                 temp[col] = row
                 nb.append(BoardState(self.pS, board=temp))
-            for row in range(self.board[col]+1, self.board.size):
+            for row in range(self.board[col]+1, self.pS.size):
                 temp = self.board[:]
                 temp[col] = row
                 nb.append(BoardState(self.pS, board=temp))
@@ -75,36 +75,68 @@ class BoardState():
         
 class TabuState():
     """Contains functions and memory for tabu search"""
-    def __init__(self):
-        pass
+    def __init__(self, maxTabu):
+        self.tabuList = [None] * maxTabu
+        self.index = 0
+        self.maxTabu = maxTabu
+    
+    def insertTabu(self, item):
+        print("index: " + str(self.index) + " max: " + str(self.maxTabu))
+        self.tabuList[self.index % self.maxTabu] = item
+        self.index += 1
+        
+    
+    
 
 def nQueensTabuSearch(pS, bS, tS, iterations):
-    neighbours = bS.neigbours()
+    currentBoard = bS
+    bestBoard = bS
     
-    # Find best neighbour
-    curBest = 0
-    bestBoard = None
-    for neighbour in bS.neighbours():
-        tempEnergy = neighbour.energy()
-        if curBest > tempEnergy:
-            curBest = tempEnergy
-            bestBoard = neighbour
+    for i in range(iterations):
+        print("iteration: "+str(i))
+        neighbours = currentBoard.neighbours()
+        
+        # Find best neighbour not in tabu list
+        curBest = 0
+        bestNeighbour = None
+        for neighbour in neighbours:
+            if tuple(neighbour.board) in tS.tabuList:
+                continue
+            if neighbour.energy > curBest:
+                curBest = neighbour.energy
+                bestNeighbour = neighbour
+        
+        if bestNeighbour == None:
+            print("Could not find anymore neighbours")
+            return bestBoard
+        
+        if bestNeighbour.energy > currentBoard.energy:
+            currentBoard = bestNeighbour
+        
+        if bestNeighbour.energy > bestBoard.energy:
+            bestBoard = bestNeighbour
+        
+        tS.insertTabu(tuple(bestNeighbour.board))
     
-    
+    return bestBoard
 
 def main():
-    startBoard = [i for i in range(10)]
+    startBoard = [random.randint(0,9) for i in range(10)]
     
     pS = ProblemState(len(startBoard))
-    bS = BoardState(pS)
-    tS = TabuState()
+    bS = BoardState(pS, board=startBoard)
+    tS = TabuState(2)
     
     startTime = time.clock()
-    solutions = nQueensTabuSearch(pS, bS, tS, 1000)
+    solution = nQueensTabuSearch(pS, bS, tS, 1000)
     endTime = time.clock()
     
+    print(solution.locStates)
+    print(solution.energy)
+    print(pS.target)
+    
     print("Runtime: "+str(endTime - startTime)+" seconds\n")
-    print(solutions)
+    print(solution.board)
     
 
 
