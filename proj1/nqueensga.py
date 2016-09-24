@@ -76,9 +76,11 @@ def initializePopulation(bS, pS):
         	derivative[col] = row
         population.append(boardState(pS, board=derivative))
     return population
+def 
 
 def chooseParents(population):
-	
+	number = 30
+
 
 def nQueensGenAlg(initPop, itr):
     population = initPop
