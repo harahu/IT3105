@@ -38,9 +38,6 @@ class boardState():
             self.locationStates();
             self.energy()
             self.req = 0
-        else:
-            self.parent = kwargs.get('parent')
-            self.change = kwargs.get('change')
 
     def locationStates(self):
         """Returns a lookup table for number of queens in a given diagonal"""
@@ -107,12 +104,20 @@ class boardState():
 def nQueensSimAnn(pS, bS, iterations):
     t0 = 30
     t = 0
+    solutions = []
     for i in range(1, iterations):
-        t = t0/(i/3)
+        t = t0/(i/10000)
         if bS.energy == pS.target:
-            print("success")
-            print(i)
-            return bS
+            new = True
+            for sol in solutions:
+                if bS.board == sol.board:
+                    new = False
+            if new:
+                solutions.append(bS)
+                print("Success!")
+                print("Iterations: "+str(i))
+                print("Temperature: "+str(t))
+                print(bS.board)
         candidate = bS.neighbour()
         dE = bS.energy - candidate.energy
         if (dE <= 0) or (math.exp(-(dE/t)) > random.random()):
@@ -133,7 +138,6 @@ def main():
         solution = nQueensSimAnn(pS, bS, 10000000)
     end = time.clock()
     print("Runtime: "+str(end - start)+" seconds\n")
-    print(solution.locStates)
     solution = solution.board
     for i in range(len(solution)):
         solution[i] += 1
