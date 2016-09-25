@@ -56,11 +56,10 @@ class boardState():
                     self.energy -= self.pS.comb[line]
 
     def mutate(self):
-        col1 = random.randint(0, self.pS.size-1)
-        col2 = random.randint(0, self.pS.size-1)
+        cols = random.sample(range(self.pS.size), 2)
         newBoard = self.board[:]
-        newBoard[col1] = self.board[col2]
-        newBoard[col2] = self.board[col1]
+        newBoard[cols[0]] = self.board[cols[1]]
+        newBoard[cols[1]] = self.board[cols[0]]
         neighbour = boardState(self.pS, board=newBoard)
         return neighbour
 
@@ -94,7 +93,7 @@ def initializePopulation(bS, pS, popSize):
     bS = boardState(pS, board=repaired)
     population.append(bS)
     for i in range(popSize-1):
-        derivative = bS.mutate().mutate().mutate()
+        derivative = bS.mutate().mutate().mutate().mutate().mutate().mutate().mutate().mutate().mutate()
         population.append(derivative)
     return population
 
@@ -159,25 +158,23 @@ def nQueensGenAlg(initPop, pS, itr):
     population = initPop
     solutions = set([])
     for i in range(itr):
-        for bS in population:
-            if bS.energy == pS.target:
-                solutions.add(tuple(bS.board))
-                #print(tuple(bS.board))
-        children = []
-        for i in range(len(initPop)):
-            tourn1 = stocasticUniversalSampling(population, 3)
-            p1 = tourney(tourn1)
-            tourn2 = stocasticUniversalSampling(population, 3)
-            p2 = tourney(tourn2)
-            child = crossover(p1, p2, pS)
-            if random.random() < 0.02:
-                child = child.mutate()
-            children.append(child)
-        population = children
-
-        #population = reproduce(parents, 20, 0.80, 0.01, pS)
-    for board in population:
-        print(pS.target - board.energy)
+        kill = -1
+        low = pS.target
+        tourney = random.sample(range(pS.size),  3)
+        tC = -1
+        for i in range(len(tourney)):
+            if population[tourney[i]].energy < low:
+                kill = tourney[i]
+                low = population[tourney[i]].energy
+                tC = i
+        del tourney[tC]
+        parent = random.sample(tourney, 1)
+        population[kill] = population[parent[0]].mutate()
+        #population[kill] = crossover(population[tourney[0]], population[tourney[1]], pS)
+        if random.random() < 0.02:
+            population[kill] = population[kill].mutate()
+        if population[kill].energy == pS.target:
+                solutions.add(tuple(population[kill].board))
     return solutions
 
 def main():
@@ -185,8 +182,8 @@ def main():
     pS = problemState(len(inBoard))
     bS = boardState(pS, board=inBoard)
     initPop = initializePopulation(bS, pS, 100)
-    solutions = nQueensGenAlg(initPop, pS, 1000)
-    print(solutions)
+    solutions = nQueensGenAlg(initPop, pS, 100000)
+    print(len(solutions))
 
 if __name__ == '__main__':
     main()
