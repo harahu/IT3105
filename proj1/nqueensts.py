@@ -76,15 +76,20 @@ class BoardState():
         
 class TabuState():
     """Contains functions and memory for tabu search"""
-    def __init__(self, maxTabu):
+    def __init__(self, pS, maxTabu):
         self.tabuList = [None] * maxTabu
         self.index = 0
         self.maxTabu = maxTabu
+        self.moveCount = {}
     
     def insertTabu(self, item):
         print("index: " + str(self.index) + " max: " + str(self.maxTabu))
         self.tabuList[self.index % self.maxTabu] = item
         self.index += 1
+        try:
+            self.moveCount[item] += 1
+        except KeyError:
+            self.moveCount[item] = 1
         
     
     
@@ -98,7 +103,7 @@ def nQueensTabuSearch(pS, bS, tS, iterations):
         neighbours = currentBoard.neighbours()
         
         # Find best neighbour not in tabu list
-        curBest = 0
+        curBest = -10000
         bestNeighbour = None
         bestMove = None
         for nMove in neighbours:
@@ -106,13 +111,18 @@ def nQueensTabuSearch(pS, bS, tS, iterations):
             if nMove in tS.tabuList and neighbour.energy < currentBoard.energy: # Aspiration criterion
                 continue
             
-            if neighbour.energy > curBest:
-                curBest = neighbour.energy
+            try:
+                nValue = neighbour.energy - tS.moveCount[nMove]
+            except KeyError:
+                nValue = neighbour.energy
+            
+            if nValue > curBest:
+                curBest = nValue
                 bestNeighbour = neighbour
                 bestMove = nMove
         
         if bestNeighbour == None:
-            print("Could not find anymore neighbours")
+            print("Could not find a new neighbours")
             return bestBoard
         
         if bestNeighbour.energy > currentBoard.energy:
@@ -126,11 +136,11 @@ def nQueensTabuSearch(pS, bS, tS, iterations):
     return bestBoard
 
 def main():
-    startBoard = [i for i in range(4)]
+    startBoard = [i for i in range(6)]
     
     pS = ProblemState(len(startBoard))
     bS = BoardState(pS, board=startBoard)
-    tS = TabuState(4)
+    tS = TabuState(pS, 4)
     
     startTime = time.clock()
     solution = nQueensTabuSearch(pS, bS, tS, 1000)
