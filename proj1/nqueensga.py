@@ -119,6 +119,16 @@ def stocasticUniversalSampling(population, n):
     return rouletteWheelSelection(population, pointers)
 
 def crossover(p1, p2, pS):
+    switches = random.sample(range(pS.size), 2)
+    switches.sort()
+    cb = p1.board[:switches[0]]
+    cb.extend(p2.board[switches[0]:switches[1]])
+    cb.extend(p1.board[switches[1]:])
+    cb = repair(cb)
+    child = boardState(pS, board=cb)
+    return child
+"""
+def crossover(p1, p2, pS):
     cb = [i for i in range(pS.size)]
     random.shuffle(cb)
     for i in range(pS.size):
@@ -129,6 +139,7 @@ def crossover(p1, p2, pS):
                     cb[i] = p1.board[i]
     child = boardState(pS, board=cb)
     return child
+"""
 
 def reproduce(parents, n, crossRate, mutationRate, pS):
     children = []
@@ -160,7 +171,7 @@ def nQueensGenAlg(initPop, pS, itr):
     for i in range(itr):
         kill = -1
         low = pS.target
-        tourney = random.sample(range(pS.size),  3)
+        tourney = random.sample(range(len(population)),  3)
         tC = -1
         for i in range(len(tourney)):
             if population[tourney[i]].energy < low:
@@ -169,20 +180,23 @@ def nQueensGenAlg(initPop, pS, itr):
                 tC = i
         del tourney[tC]
         parent = random.sample(tourney, 1)
-        population[kill] = population[parent[0]].mutate()
-        #population[kill] = crossover(population[tourney[0]], population[tourney[1]], pS)
-        if random.random() < 0.02:
+        if random.random() < 0.99:
+            population[kill] = population[parent[0]].mutate()
+        else:
+            population[kill] = crossover(population[tourney[0]], population[tourney[1]], pS)
+        if random.random() < 0.05:
             population[kill] = population[kill].mutate()
         if population[kill].energy == pS.target:
                 solutions.add(tuple(population[kill].board))
+                print(len(solutions))
     return solutions
 
 def main():
     inBoard = [i for i in range(30)]
     pS = problemState(len(inBoard))
     bS = boardState(pS, board=inBoard)
-    initPop = initializePopulation(bS, pS, 100)
-    solutions = nQueensGenAlg(initPop, pS, 100000)
+    initPop = initializePopulation(bS, pS, 1000)
+    solutions = nQueensGenAlg(initPop, pS, 1000000)
     print(len(solutions))
 
 if __name__ == '__main__':
