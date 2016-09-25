@@ -1,4 +1,5 @@
 import math, random, time, sys
+from tools import *
 
 class ProblemState():
     """Contains information dependent on problem size to be looked up.
@@ -91,49 +92,6 @@ class TabuState():
         except KeyError:
             self.moveCount[item] = 1
         
-def repair(board):
-    """Moves queen that are on the same row"""
-    rows = [0 for i in range(len(board))]
-    fix = [False for i in range(len(board))]
-    repaired = [-1 for i in range(len(board))]
-    for i in range(len(board)):
-        if rows[board[i]] == 0:
-            repaired[i] = board[i]
-        else:
-            fix[i] = True
-        rows[board[i]] += 1
-    unused = []
-    for i in range(len(rows)):
-        if rows[i] == 0:
-            unused.append(i)
-    random.shuffle(unused)
-    j = 0
-    for i in range(len(fix)):
-        if fix[i]:
-            repaired[i] = unused[j]
-            j += 1
-    return repaired
-
-def mirrorInvert(board):
-    """Returns mirrored, inverted and inverted mirrored solutions"""
-    inverted = []
-    mirrored = []
-    inverted_mirrored = []
-    for i in range(len(board)):
-        inverted.append(len(board)-board[i]-1)
-        mirrored.append(board[len(board)-i-1])
-        inverted_mirrored.append(len(board)-board[len(board)-i-1]-1)
-    
-    return (inverted, mirrored, inverted_mirrored)
-
-def expandSolution(board):
-    """Returns 7 related solutions from one solution"""
-    rotatedBoard = board[:]
-    for i in range(len(board)):
-        rotatedBoard[board[i]] = len(board) - 1 - i
-    
-    return (rotatedBoard,) + mirrorInvert(rotatedBoard) + mirrorInvert(board)    
-    
 
 def nQueensTabuSearch(pS, bS, tS, iterations, ltmWeight=0.1):
     currentBoard = bS
@@ -182,25 +140,16 @@ def nQueensTabuSearch(pS, bS, tS, iterations, ltmWeight=0.1):
             solutions.add(tuple(bestNeighbour.board))
             for s in expandSolution(bestNeighbour.board):
                 solutions.add(tuple(s))
+            print(len(solutions))
         
         tS.insertTabu(bestMove)
     
     return solutions
 
-def getInput():
-    """Get input from user or from sys.argv"""
-    if len(sys.argv) == 1:
-        int(input("Specify board size: ")) # to meet requirement
-        rawBoard = input("Enter board data: ").split(" ")
-    else:
-        rawBoard = sys.argv[1:]
-    board = [int(i) for i in rawBoard]
-    return board
-
 
 def main():
     #startBoard = getInput()
-    startBoard = [i for i in range(20)]
+    startBoard = [i for i in range(30)]
     startBoard = repair(startBoard)
     
     pS = ProblemState(len(startBoard))
@@ -209,7 +158,7 @@ def main():
     
     for w in range(1, 2, 1):
         startTime = time.clock()
-        solutions = nQueensTabuSearch(pS, bS, tS, 100, ltmWeight=(w/10))
+        solutions = nQueensTabuSearch(pS, bS, tS, 1000, ltmWeight=(w/10))
         endTime = time.clock()
     
         #print(tS.moveCount)
