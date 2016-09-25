@@ -112,7 +112,28 @@ def repair(board):
         if fix[i]:
             repaired[i] = unused[j]
             j += 1
-    return repaired   
+    return repaired
+
+def mirrorInvert(board):
+    """Returns mirrored, inverted and inverted mirrored solutions"""
+    inverted = []
+    mirrored = []
+    inverted_mirrored = []
+    for i in range(len(board)):
+        inverted.append(len(board)-board[i]-1)
+        mirrored.append(board[len(board)-i-1])
+        inverted_mirrored.append(len(board)-board[len(board)-i-1]-1)
+    
+    return (inverted, mirrored, inverted_mirrored)
+
+def expandSolution(board):
+    """Returns 7 related solutions from one solution"""
+    rotatedBoard = board[:]
+    for i in range(len(board)):
+        rotatedBoard[board[i]] = len(board) - 1 - i
+    
+    return (rotatedBoard,) + mirrorInvert(rotatedBoard) + mirrorInvert(board)    
+    
 
 def nQueensTabuSearch(pS, bS, tS, iterations, ltmWeight=0.1):
     currentBoard = bS
@@ -159,6 +180,8 @@ def nQueensTabuSearch(pS, bS, tS, iterations, ltmWeight=0.1):
         if bestNeighbour.energy == pS.target:
             #print("Found solution at iteration " + str(i))
             solutions.add(tuple(bestNeighbour.board))
+            for s in expandSolution(bestNeighbour.board):
+                solutions.add(tuple(s))
         
         tS.insertTabu(bestMove)
     
@@ -176,14 +199,15 @@ def getInput():
 
 
 def main():
-    startBoard = getInput()
+    #startBoard = getInput()
+    startBoard = [i for i in range(20)]
     startBoard = repair(startBoard)
     
     pS = ProblemState(len(startBoard))
     bS = BoardState(pS, board=startBoard)
     tS = TabuState(pS, 3)
     
-    for w in range(0, 11, 1):
+    for w in range(1, 2, 1):
         startTime = time.clock()
         solutions = nQueensTabuSearch(pS, bS, tS, 100, ltmWeight=(w/10))
         endTime = time.clock()
@@ -194,7 +218,7 @@ def main():
         #print("Runtime: "+str(endTime - startTime)+" seconds\n")
         print("Found " + str(len(solutions)) + " solutions")
     
-
+    
 
 if __name__ == '__main__':
     main()
