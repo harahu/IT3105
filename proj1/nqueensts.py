@@ -100,12 +100,16 @@ def nQueensTabuSearch(pS, bS, tS, iterations):
         # Find best neighbour not in tabu list
         curBest = 0
         bestNeighbour = None
-        for neighbour in neighbours:
-            if tuple(neighbour.board) in tS.tabuList:
+        bestMove = None
+        for nMove in neighbours:
+            neighbour = currentBoard.doMove(nMove)
+            if nMove in tS.tabuList and neighbour.energy < currentBoard.energy: # Aspiration criterion
                 continue
+            
             if neighbour.energy > curBest:
                 curBest = neighbour.energy
                 bestNeighbour = neighbour
+                bestMove = nMove
         
         if bestNeighbour == None:
             print("Could not find anymore neighbours")
@@ -117,7 +121,7 @@ def nQueensTabuSearch(pS, bS, tS, iterations):
         if bestNeighbour.energy > bestBoard.energy:
             bestBoard = bestNeighbour
         
-        tS.insertTabu(tuple(bestNeighbour.board))
+        tS.insertTabu(bestMove)
     
     return bestBoard
 
@@ -126,7 +130,7 @@ def main():
     
     pS = ProblemState(len(startBoard))
     bS = BoardState(pS, board=startBoard)
-    tS = TabuState(2)
+    tS = TabuState(4)
     
     startTime = time.clock()
     solution = nQueensTabuSearch(pS, bS, tS, 1000)
