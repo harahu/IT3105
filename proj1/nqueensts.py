@@ -83,7 +83,7 @@ class TabuState():
         self.moveCount = {}
     
     def insertTabu(self, item):
-        print("index: " + str(self.index) + " max: " + str(self.maxTabu))
+        #print("index: " + str(self.index) + " max: " + str(self.maxTabu))
         self.tabuList[self.index % self.maxTabu] = item
         self.index += 1
         try:
@@ -97,9 +97,10 @@ class TabuState():
 def nQueensTabuSearch(pS, bS, tS, iterations):
     currentBoard = bS
     bestBoard = bS
+    solutions = set()
     
     for i in range(iterations):
-        print("iteration: "+str(i))
+        #print("iteration: "+str(i))
         neighbours = currentBoard.neighbours()
         
         # Find best neighbour not in tabu list
@@ -108,11 +109,15 @@ def nQueensTabuSearch(pS, bS, tS, iterations):
         bestMove = None
         for nMove in neighbours:
             neighbour = currentBoard.doMove(nMove)
-            if nMove in tS.tabuList and neighbour.energy < currentBoard.energy: # Aspiration criterion
+            #print(str(nMove), end='')
+            if nMove in tS.tabuList and neighbour.energy <= currentBoard.energy: # Aspiration criterion
+                #print(" in tabulist, skipping")
                 continue
-            
+            elif nMove in tS.tabuList and neighbour.energy > currentBoard.energy:
+                pass#print(" in tabulist, but", end='')
+            #print(" is being considered")
             try:
-                nValue = neighbour.energy - tS.moveCount[nMove]
+                nValue = neighbour.energy - 0.1*tS.moveCount[nMove]
             except KeyError:
                 nValue = neighbour.energy
             
@@ -120,38 +125,42 @@ def nQueensTabuSearch(pS, bS, tS, iterations):
                 curBest = nValue
                 bestNeighbour = neighbour
                 bestMove = nMove
-        
+        #print("Best move " + str(bestMove))
         if bestNeighbour == None:
             print("Could not find a new neighbours")
-            return bestBoard
+            return solutions
         
-        if bestNeighbour.energy > currentBoard.energy:
+        if bestNeighbour.energy >= currentBoard.energy:
             currentBoard = bestNeighbour
         
         if bestNeighbour.energy > bestBoard.energy:
             bestBoard = bestNeighbour
         
+        if bestNeighbour.energy == pS.target:
+            #print("Found solution at iteration " + str(i))
+            solutions.add(bestNeighbour)
+        
         tS.insertTabu(bestMove)
     
-    return bestBoard
+    return solutions
 
 def main():
-    startBoard = [i for i in range(6)]
+    startBoard = [i for i in range(20)]
+    random.shuffle(startBoard)
     
     pS = ProblemState(len(startBoard))
     bS = BoardState(pS, board=startBoard)
     tS = TabuState(pS, 4)
     
     startTime = time.clock()
-    solution = nQueensTabuSearch(pS, bS, tS, 1000)
+    solutions = nQueensTabuSearch(pS, bS, tS, 1000)
     endTime = time.clock()
     
-    print(solution.locStates)
-    print(solution.energy)
+    print(tS.moveCount)
     print(pS.target)
     
     print("Runtime: "+str(endTime - startTime)+" seconds\n")
-    print(solution.board)
+    print("Found " + str(len(solutions)) + " solutions")
     
 
 
