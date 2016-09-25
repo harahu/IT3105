@@ -67,77 +67,40 @@ class boardState():
         neighbour = boardState(self.pS, board=newBoard)
         return neighbour
 
-    """
-    def neighbour(self):
-        if self.req == 0:
-            self.neighbourOrder = []
-            for i in range(self.pS.size):
-                for j in range(self.pS.size):
-                    if j<=i:
-                        pass
-                    self.neighbourOrder.append([i, j])
-            random.shuffle(self.neighbourOrder)
-        if self.req >= len(self.neighbourOrder):
-            self.req = 0
+    def neighbour2(self):
+        cols = random.sample(range(self.pS.size), 2)
         newBoard = self.board[:]
-        switch = self.neighbourOrder[self.req]
-        hold = newBoard[switch[0]]
-        newBoard[switch[0]] = newBoard[switch[1]]
-        newBoard[switch[1]] = hold
-        neighbour = boardState(self.pS, board=newBoard)
-        self.req += 1
-        return neighbour
-
-    def neighbour(self):
-        newBoard = self.board[:]
-        switch = random.randint(0, self.pS.size-2)
-        hold = newBoard[switch]
-        newBoard[switch] = newBoard[switch+1]
-        newBoard[switch+1] = hold
+        newBoard[cols[0]] = self.board[cols[1]]
+        newBoard[cols[1]] = self.board[cols[0]]
         neighbour = boardState(self.pS, board=newBoard)
         return neighbour
-
-    def neighbour(self):
-        cut = random.randint(1, self.pS.size-1)
-        newBoard = self.board[cut:]+self.board[:cut]
-        neighbour = boardState(self.pS, board=newBoard)
-        return neighbour
-    """
 
 def nQueensSimAnn(pS, bS, iterations):
-    t0 = 30
-    t = 0
+    t = 1000
+    a = 0.99
+    solutions = set([])
     for i in range(1, iterations):
-        t = t0/(i/3)
         if bS.energy == pS.target:
-            print("success")
-            print(i)
-            return bS
-        candidate = bS.neighbour()
+            solutions.add(tuple(bS.board))
+        candidate = bS.neighbour2()
         dE = bS.energy - candidate.energy
-        if (dE <= 0) or (math.exp(-(dE/t)) > random.random()):
+        if (dE < 0) or (math.exp(-(dE/t)) > random.random()):
             bS = candidate
-    print("failed")
-    print(t)
-    return bS
+        t *= 0.99
+    return solutions
         
 def main():
-    inBoard = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29]
+    inBoard = [i for i in range(30)]
     
     pS = problemState(len(inBoard))
 
     bS = boardState(pS, board=inBoard)
     
     start = time.clock()
-    for i in range(1):
-        solution = nQueensSimAnn(pS, bS, 10000000)
+    solutions = nQueensSimAnn(pS, bS, 500000)
+    print(len(solutions))
     end = time.clock()
     print("Runtime: "+str(end - start)+" seconds\n")
-    print(solution.locStates)
-    solution = solution.board
-    for i in range(len(solution)):
-        solution[i] += 1
-    print(solution)
     
 if __name__ == '__main__':
     main()
