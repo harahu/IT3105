@@ -65,20 +65,14 @@ class BoardState():
                 temp.append((col0, col1))
         
         return temp
+    
+    def doMove(self, move):
+        """Executes a move on a copy of board, and returns it"""
+        tempBoard = self.board[:]
+        tempBoard[move[0]] = self.board[move[1]]
+        tempBoard[move[1]] = self.board[move[0]]
         
-        # get neighbours by moving queen to each row in columns
-        """
-        for col in range(self.pS.size):
-            for row in range(self.board[col]+1):
-                temp = self.board[:]
-                temp[col] = row
-                nb.append(BoardState(self.pS, board=temp))
-            for row in range(self.board[col]+1, self.pS.size):
-                temp = self.board[:]
-                temp[col] = row
-                nb.append(BoardState(self.pS, board=temp))
-        
-        return nb"""
+        return BoardState(self.pS, board=tempBoard)
         
 class TabuState():
     """Contains functions and memory for tabu search"""
