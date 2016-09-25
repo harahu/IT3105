@@ -57,10 +57,17 @@ class BoardState():
                     self.energy -= self.pS.comb[line]
 
     def neighbours(self):
-        """Returns a list of neighbours"""
+        """Returns a list of moves to get to neighbours"""
         temp = []
-        nb = []
+        # get neighbours by swapping columns
+        for col0 in range(self.pS.size-1):
+            for col1 in range(col0+1, self.pS.size):
+                temp.append((col0, col1))
+        
+        return temp
+        
         # get neighbours by moving queen to each row in columns
+        """
         for col in range(self.pS.size):
             for row in range(self.board[col]+1):
                 temp = self.board[:]
@@ -71,7 +78,7 @@ class BoardState():
                 temp[col] = row
                 nb.append(BoardState(self.pS, board=temp))
         
-        return nb
+        return nb"""
         
 class TabuState():
     """Contains functions and memory for tabu search"""
@@ -121,7 +128,7 @@ def nQueensTabuSearch(pS, bS, tS, iterations):
     return bestBoard
 
 def main():
-    startBoard = [random.randint(0,9) for i in range(10)]
+    startBoard = [i for i in range(4)]
     
     pS = ProblemState(len(startBoard))
     bS = BoardState(pS, board=startBoard)
