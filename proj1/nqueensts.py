@@ -158,7 +158,7 @@ def nQueensTabuSearch(pS, bS, tS, iterations, ltmWeight=0.1):
         
         if bestNeighbour.energy == pS.target:
             #print("Found solution at iteration " + str(i))
-            solutions.add(bestNeighbour)
+            solutions.add(tuple(bestNeighbour.board))
         
         tS.insertTabu(bestMove)
     
