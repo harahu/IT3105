@@ -1,4 +1,4 @@
-import math, random, time
+import math, random, time, sys
 
 class ProblemState():
     """Contains information dependent on problem size to be looked up.
@@ -91,8 +91,28 @@ class TabuState():
         except KeyError:
             self.moveCount[item] = 1
         
-    
-    
+def repair(board):
+    """Moves queen that are on the same row"""
+    rows = [0 for i in range(len(board))]
+    fix = [False for i in range(len(board))]
+    repaired = [-1 for i in range(len(board))]
+    for i in range(len(board)):
+        if rows[board[i]] == 0:
+            repaired[i] = board[i]
+        else:
+            fix[i] = True
+        rows[board[i]] += 1
+    unused = []
+    for i in range(len(rows)):
+        if rows[i] == 0:
+            unused.append(i)
+    random.shuffle(unused)
+    j = 0
+    for i in range(len(fix)):
+        if fix[i]:
+            repaired[i] = unused[j]
+            j += 1
+    return repaired   
 
 def nQueensTabuSearch(pS, bS, tS, iterations, ltmWeight=0.1):
     currentBoard = bS
@@ -144,9 +164,20 @@ def nQueensTabuSearch(pS, bS, tS, iterations, ltmWeight=0.1):
     
     return solutions
 
+def getInput():
+    """Get input from user or from sys.argv"""
+    if len(sys.argv) == 1:
+        int(input("Specify board size: ")) # to meet requirement
+        rawBoard = input("Enter board data: ").split(" ")
+    else:
+        rawBoard = sys.argv[1:]
+    board = [int(i) for i in rawBoard]
+    return board
+
+
 def main():
-    startBoard = [i for i in range(30)]
-    #random.shuffle(startBoard)
+    startBoard = getInput()
+    startBoard = repair(startBoard)
     
     pS = ProblemState(len(startBoard))
     bS = BoardState(pS, board=startBoard)
