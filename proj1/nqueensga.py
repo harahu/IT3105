@@ -41,14 +41,13 @@ class boardState():
 
     def locationStates(self):
         """Returns a lookup table for number of queens in a given diagonal"""
-        self.locStates = [[0 for i in range(self.pS.size)], [0 for i in range(2 * self.pS.size - 1)], [0 for i in range(2 * self.pS.size - 1)]]
+        self.locStates = [[0 for i in range(2 * self.pS.size - 1)], [0 for i in range(2 * self.pS.size - 1)]]
         for col in range(self.pS.size):
             row = self.board[col]
-            self.locStates[0][row] += 1
             #marking NW to SE diagonal as under attack
-            self.locStates[1][self.pS.diagCoords[col][row][0]] += 1
+            self.locStates[0][self.pS.diagCoords[col][row][0]] += 1
             #marking SW to NE diagonal as under attack
-            self.locStates[2][self.pS.diagCoords[col][row][1]] += 1
+            self.locStates[1][self.pS.diagCoords[col][row][1]] += 1
 
     def energy(self):
         self.energy = self.pS.target
@@ -56,37 +55,57 @@ class boardState():
             for line in locList:
                     self.energy -= self.pS.comb[line]
 
-    def neighbour(self):
-        col = random.randint(0, self.pS.size-1)
-        row = random.randint(0, self.pS.size-1)
+    def mutate(self):
+        col1 = random.randint(0, self.pS.size-1)
+        col2 = random.randint(0, self.pS.size-1)
         newBoard = self.board[:]
-        newBoard[col] = row
+        newBoard[col1] = self.board[col2]
+        newBoard[col2] = self.board[col1]
         neighbour = boardState(self.pS, board=newBoard)
         return neighbour
 
-class population():
-	def __init__(self, boardState):
+def repair(board):
+    rows = [0 for i in range(len(board))]
+    fix = [False for i in range(len(board))]
+    repaired = [-1 for i in range(len(board))]
+    for i in range(len(board)):
+        if rows[board[i]] == 0:
+            repaired[i] = board[i]
+        else:
+            fix[i] = True
+        rows[board[i]] += 1
+    unused = []
+    for i in range(len(rows)):
+        if rows[i] == 0:
+            unused.append(i)
+    random.shuffle(unused)
+    j = 0
+    for i in range(len(fix)):
+        if fix[i]:
+            repaired[i] = unused[j]
+            j += 1
+    return repaired
 
-def initializePopulation(bS, pS):
-	population = []
-	population.append(bS)
-	for i in range(size-1):
-		derivative = bS.board[:]
-		for i in range(2):
-			col = random.randint(0, pS.size-1)
-        	row = random.randint(0, pS.size-1)
-        	derivative[col] = row
-        population.append(boardState(pS, board=derivative))
+
+
+def initializePopulation(bS, pS, popSize):
+    population = []
+    repaired = repair(bS.board)
+    bS = boardState(pS, board=repaired)
+    population.append(bS)
+    for i in range(popSize-1):
+        derivative = bS.mutate().mutate().mutate()
+        population.append(derivative)
     return population
 
 def rouletteWheelSelection(population, pointers):
     keep = []
     for p in pointers:
         i = 0
-        fSum = 0
+        fSum = population[0].energy
         while fSum < p:
+            i += 1
             fSum+=population[i].energy
-            i++
         keep.append(population[i])
     return keep
 
@@ -95,33 +114,79 @@ def stocasticUniversalSampling(population, n):
     f = 0
     for individual in population:
         f += individual.energy
-    pD = f/n
+    pD = f//n
     sP = random.randint(0, pD)
     pointers = [(sP + i*pD) for i in range(n-1)]
     return rouletteWheelSelection(population, pointers)
 
-def nQueensGenAlg(initPop, itr):
+def crossover(p1, p2, pS):
+    cb = [i for i in range(pS.size)]
+    random.shuffle(cb)
+    for i in range(pS.size):
+        if p1.board[i] == p2.board[i]:
+            for j in range(pS.size):
+                if cb[j] == p1.board[i]:
+                    cb[j] = cb[i]
+                    cb[i] = p1.board[i]
+    child = boardState(pS, board=cb)
+    return child
+
+def reproduce(parents, n, crossRate, mutationRate, pS):
+    children = []
+    for i in range(n):
+        parent = parents[(i % len(parents))]
+        if random.random() <= crossRate:
+            randParent = parents[random.randint(0, len(parents)-1)]
+            child = crossover(parent, randParent, pS)
+        else:
+            child = parent
+        if random.random() < mutationRate:
+            child = child.mutate()
+        children.append(child)
+    return children
+
+def tourney(pop):
+    best = None
+    maxEng = 0
+    for bS in pop:
+        if bS.energy > maxEng:
+            best = bS
+            maxEng = bS.energy
+    return best
+
+
+def nQueensGenAlg(initPop, pS, itr):
     population = initPop
-    solutions = []
+    solutions = set([])
     for i in range(itr):
-        parents = stocasticUniversalSampling(population, 30)
-        children = mutate(reproduce(parents))
-        population = selectFromPopulations(parents, children)
-        for individual in population:
-        	if individual.energy: #is goal
-        		solutions.append(individual)
+        for bS in population:
+            if bS.energy == pS.target:
+                solutions.add(tuple(bS.board))
+                #print(tuple(bS.board))
+        children = []
+        for i in range(len(initPop)):
+            tourn1 = stocasticUniversalSampling(population, 3)
+            p1 = tourney(tourn1)
+            tourn2 = stocasticUniversalSampling(population, 3)
+            p2 = tourney(tourn2)
+            child = crossover(p1, p2, pS)
+            if random.random() < 0.02:
+                child = child.mutate()
+            children.append(child)
+        population = children
+
+        #population = reproduce(parents, 20, 0.80, 0.01, pS)
+    for board in population:
+        print(pS.target - board.energy)
     return solutions
 
 def main():
-	inBoard = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
-
-	pS = problemState(len(inBoard))
-
+    inBoard = [i for i in range(30)]
+    pS = problemState(len(inBoard))
     bS = boardState(pS, board=inBoard)
-
-    initPop = initializePopulation(bS, 50)
-
-    solutions = nQueensGenAlg(initPop, 1000)
+    initPop = initializePopulation(bS, pS, 100)
+    solutions = nQueensGenAlg(initPop, pS, 1000)
+    print(solutions)
 
 if __name__ == '__main__':
     main()
