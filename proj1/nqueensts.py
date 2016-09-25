@@ -94,7 +94,7 @@ class TabuState():
     
     
 
-def nQueensTabuSearch(pS, bS, tS, iterations):
+def nQueensTabuSearch(pS, bS, tS, iterations, ltmWeight=0.1):
     currentBoard = bS
     bestBoard = bS
     solutions = set()
@@ -117,7 +117,7 @@ def nQueensTabuSearch(pS, bS, tS, iterations):
                 pass#print(" in tabulist, but", end='')
             #print(" is being considered")
             try:
-                nValue = neighbour.energy - 0.1*tS.moveCount[nMove]
+                nValue = neighbour.energy - ltmWeight * tS.moveCount[nMove]
             except KeyError:
                 nValue = neighbour.energy
             
@@ -145,22 +145,23 @@ def nQueensTabuSearch(pS, bS, tS, iterations):
     return solutions
 
 def main():
-    startBoard = [i for i in range(20)]
-    random.shuffle(startBoard)
+    startBoard = [i for i in range(30)]
+    #random.shuffle(startBoard)
     
     pS = ProblemState(len(startBoard))
     bS = BoardState(pS, board=startBoard)
-    tS = TabuState(pS, 4)
+    tS = TabuState(pS, 3)
     
-    startTime = time.clock()
-    solutions = nQueensTabuSearch(pS, bS, tS, 1000)
-    endTime = time.clock()
+    for w in range(0, 11, 1):
+        startTime = time.clock()
+        solutions = nQueensTabuSearch(pS, bS, tS, 100, ltmWeight=(w/10))
+        endTime = time.clock()
     
-    print(tS.moveCount)
-    print(pS.target)
-    
-    print("Runtime: "+str(endTime - startTime)+" seconds\n")
-    print("Found " + str(len(solutions)) + " solutions")
+        #print(tS.moveCount)
+        #print(pS.target)
+        print("Used " + str(w/10) + " as weight")
+        #print("Runtime: "+str(endTime - startTime)+" seconds\n")
+        print("Found " + str(len(solutions)) + " solutions")
     
 
 
