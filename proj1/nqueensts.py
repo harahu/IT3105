@@ -1,8 +1,11 @@
 import math, random, time, sys
 from tools import *
 
+global STEPS
+STEPS = 0
 
 class BoardState():
+    """Contains board data plus functions to calculate neighbours copy board"""
     def __init__(self, pS, **kwargs):
         self.pS = pS
         self.board = kwargs.get('board')
@@ -23,6 +26,7 @@ class BoardState():
             self.locStates[2][self.pS.diagCoords[col][row][1]] += 1
 
     def energy(self):
+        """Calculate energy (fitness) for board"""
         self.energy = self.pS.target
         for locList in self.locStates:
             for line in locList:
@@ -65,12 +69,14 @@ class TabuState():
         
 
 def nQueensTabuSearch(pS, bS, tS, iterations, ltmWeight=0.1):
+    """Runs tabu search on boardState, bS"""
     currentBoard = bS
     bestBoard = bS
     solutions = set()
     
     for i in range(iterations):
-        #print("iteration: "+str(i))
+        print("iteration: "+str(i), end='') if STEPS else 0
+        input() if STEPS else 0
         neighbours = currentBoard.neighbours()
         
         # Find best neighbour not in tabu list
@@ -79,23 +85,23 @@ def nQueensTabuSearch(pS, bS, tS, iterations, ltmWeight=0.1):
         bestMove = None
         for nMove in neighbours:
             neighbour = currentBoard.doMove(nMove)
-            #print(str(nMove), end='')
+            print(str(nMove), end='') if STEPS else 0
             if nMove in tS.tabuList and neighbour.energy <= currentBoard.energy: # Aspiration criterion
-                #print(" in tabulist, skipping")
+                print(" in tabulist, skipping") if STEPS else 0
                 continue
             elif nMove in tS.tabuList and neighbour.energy > currentBoard.energy:
-                pass#print(" in tabulist, but", end='')
-            #print(" is being considered")
+                print(" in tabulist, but", end='') if STEPS else 0
+            print(" is being considered") if STEPS else 0
             try:
                 nValue = neighbour.energy - ltmWeight * tS.moveCount[nMove]
-            except KeyError:
+            except KeyError: # KeyError occures when current move is not in tabu list
                 nValue = neighbour.energy
             
             if nValue > curBest:
                 curBest = nValue
                 bestNeighbour = neighbour
                 bestMove = nMove
-        #print("Best move " + str(bestMove))
+        print("Best move " + str(bestMove)) if STEPS else 0
         if bestNeighbour == None:
             print("Could not find a new neighbours")
             return solutions
@@ -107,11 +113,10 @@ def nQueensTabuSearch(pS, bS, tS, iterations, ltmWeight=0.1):
             bestBoard = bestNeighbour
         
         if bestNeighbour.energy == pS.target:
-            #print("Found solution at iteration " + str(i))
             solutions.add(tuple(bestNeighbour.board))
             for s in expandSolution(bestNeighbour.board):
                 solutions.add(tuple(s))
-            print(len(solutions))
+            #print(len(solutions))
         
         tS.insertTabu(bestMove)
     
@@ -119,8 +124,8 @@ def nQueensTabuSearch(pS, bS, tS, iterations, ltmWeight=0.1):
 
 
 def main():
-    #startBoard = getInput()
-    startBoard = [i for i in range(40)]
+    startBoard = getInput()
+    #startBoard = [i for i in range(30)]
     startBoard = repair(startBoard)
     
     pS = ProblemState(len(startBoard))
@@ -129,7 +134,7 @@ def main():
     
     for w in range(1, 2, 1):
         startTime = time.clock()
-        solutions = nQueensTabuSearch(pS, bS, tS, 1000, ltmWeight=(w/10))
+        solutions = nQueensTabuSearch(pS, bS, tS, 100, ltmWeight=(w/10))
         endTime = time.clock()
     
         #print(tS.moveCount)
