@@ -1,14 +1,12 @@
 /*
-Solution to 8-queen problem by using backtracking
+Solution to n-queen problem by using backtracking
 
 INPUT:
-    8 integers
+    n integers
         ex: 1 2 3 4 0 0 0 0
     input refers to the row for a queen in each column
-    0 means empty
+    0 means empty column
 
-
-Hans-Kristian Bruvold
 */
 
 #include <stdio.h>
