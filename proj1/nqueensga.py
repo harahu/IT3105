@@ -69,7 +69,7 @@ def stocasticUniversalSampling(population, n):
 
 def crossover(p1, p2, pS):
     """
-    Order1 crossover with population diversifying
+    Order1 crossover with population homogenity management
     """
     switches = random.sample(range(pS.size+1), 2)
     switches.sort()
@@ -88,7 +88,7 @@ def crossover(p1, p2, pS):
     child = BoardState(pS, board=ncb)
     return child
 
-def tournament(population, solutions, pS):
+def tournament(population, solutions, pS, steps):
     """
     Runs tournament on three random individuals.
     Worst individual is killed and replaced with
@@ -105,13 +105,23 @@ def tournament(population, solutions, pS):
             tC = j
     del tourney[tC]
     parent = random.sample(tourney, 1)
-    if random.random() < 0.10:
+    if steps:
+        print("Killed:", end=' ')
+        printBoard(population[kill].board)
+    if random.random() < 0.95:
         population[kill] = population[parent[0]].mutate()
     else:
         population[kill] = crossover(population[tourney[0]], population[tourney[1]], pS)
     if random.random() < 0.02:
         population[kill] = population[kill].mutate()
+    if steps:
+        print("Added: ", end=' ')
+        printBoard(population[kill].board)
     if population[kill].energy == pS.target:
+        if steps:
+            print("Solution found:")
+            printBoard(population[kill].board)
+            input()
         solutions.add(tuple(population[kill].board))
         derivates = expandSolution(population[kill].board)
         for solution in derivates:
@@ -136,10 +146,13 @@ def nQueensGenAlg(initPop, pS, itr, nuclearSafetyBudget, steps):
     population = initPop
     solutions = set([])
     for i in range(itr):
-        tournament(population, solutions, pS)
+        if steps:
+            print('--------------------')
+            print("Iteration: "+str(i))
+        tournament(population, solutions, pS, steps)
         if i % nuclearSafetyBudget == 0:
             nuclearAccident(population, solutions, pS)
-        print(len(solutions), end='\r')
+        #print(len(solutions), end='\r')
     return solutions
 
 def main():
