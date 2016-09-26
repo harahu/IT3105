@@ -45,8 +45,8 @@ def printSolutions(solutions):
 
 def printBoard(board):
     for col in board:
-            print(col+1, end=' ')
-        print('\n')
+        print(col+1, end=' ')
+    print('\n')
 
 
 def printRuntime(runTime):
@@ -136,7 +136,7 @@ def askForStep():
     Ask user if program should be stepped
     Output: Boolean
     """
-    answer = input("Run with stepped? (y/N) ")
+    answer = input("Run step-by-step? (y/N): ")
     if answer == 'y':
         return True
     return False
