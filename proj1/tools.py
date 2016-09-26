@@ -35,6 +35,28 @@ class ProblemState():
                 diagCoords[col][row][1] = col + row
         return diagCoords
 
+def printSolutions(solutions):
+    for solution in solutions:
+        print('>>', end=' ')
+        for col in solution:
+            print(col, end=' ')
+        print('\n')
+    print(str(len(solutions))+" solutions found")
+
+def printRuntime(runTime):
+    if runTime < 1:
+        runTime = round(runTime, 5)
+    elif runTime < 5:
+        runTime = round(runTime, 3)
+    elif runTime < 10:
+        runTime = round(runTime, 2)
+    elif runTime < 20:
+        runTime = round(runTime, 1)
+    else:
+        runTime = round(runTime)
+
+    print("Runtime: "+str(runTime)+" seconds")
+
 def repair(board):
     """
     Moves queen that are on the same row

@@ -1,4 +1,4 @@
-import random
+import random, time
 
 class problemState():
     """Contains information dependent on problem size to be looked up.
@@ -93,7 +93,7 @@ def initializePopulation(bS, pS, popSize):
     bS = boardState(pS, board=repaired)
     population.append(bS)
     for i in range(popSize-1):
-        derivative = bS.mutate().mutate().mutate().mutate().mutate().mutate().mutate().mutate().mutate()
+        derivative = bS.mutate().mutate()
         population.append(derivative)
     return population
 
@@ -127,6 +127,7 @@ def crossover(p1, p2, pS):
     cb = repair(cb)
     child = boardState(pS, board=cb)
     return child
+
 """
 def crossover(p1, p2, pS):
     cb = [i for i in range(pS.size)]
@@ -173,31 +174,45 @@ def nQueensGenAlg(initPop, pS, itr):
         low = pS.target
         tourney = random.sample(range(len(population)),  3)
         tC = -1
-        for i in range(len(tourney)):
-            if population[tourney[i]].energy < low:
-                kill = tourney[i]
-                low = population[tourney[i]].energy
-                tC = i
+        for j in range(len(tourney)):
+            if population[tourney[j]].energy < low:
+                kill = tourney[j]
+                low = population[tourney[j]].energy
+                tC = j
         del tourney[tC]
         parent = random.sample(tourney, 1)
         if random.random() < 0.99:
             population[kill] = population[parent[0]].mutate()
         else:
             population[kill] = crossover(population[tourney[0]], population[tourney[1]], pS)
-        if random.random() < 0.05:
+        if random.random() < 0.02:
             population[kill] = population[kill].mutate()
         if population[kill].energy == pS.target:
                 solutions.add(tuple(population[kill].board))
-                print(len(solutions))
+                print(str(len(solutions))+" "+str(i))
+        #reactor meltdown
+        
+        if i % 50000 == 0:
+            for j in range(len(population)):
+                population[j] = population[j].mutate()
+                if random.random() < 0.50:
+                    population[j] = population[j].mutate()
+                if population[j].energy == pS.target:
+                    solutions.add(tuple(population[j].board))
+                    print(str(len(solutions))+" "+str(i))
+        
     return solutions
 
 def main():
     inBoard = [i for i in range(30)]
     pS = problemState(len(inBoard))
     bS = boardState(pS, board=inBoard)
-    initPop = initializePopulation(bS, pS, 1000)
+    initPop = initializePopulation(bS, pS, 100)
+    start = time.clock()
     solutions = nQueensGenAlg(initPop, pS, 1000000)
+    end = time.clock()
     print(len(solutions))
+    print("Runtime: "+str(end - start)+" seconds\n")
 
 if __name__ == '__main__':
     main()
