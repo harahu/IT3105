@@ -130,8 +130,8 @@ def askForStep():
     Ask user if program should be stepped
     Output: Boolean
     """
-    answere = input("Run with stepped? (y/N) ")
-    if answere == 'y':
+    answer = input("Run with stepped? (y/N) ")
+    if answer == 'y':
         return True
     return False
 
