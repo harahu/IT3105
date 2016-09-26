@@ -1,6 +1,6 @@
 #! /usr/bin/python3
 
-import random
+import random, sys
 
 """A collections of functions used in algorithms"""
 
