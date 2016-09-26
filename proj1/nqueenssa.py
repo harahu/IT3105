@@ -79,6 +79,7 @@ def nQueensSimAnn(pS, bS, itr, initTmp, a):
     return solutions
         
 def main():
+    #inBoard = getInput()
     inBoard = [i for i in range(30)]
     inBoard = repair(inBoard)
     

@@ -122,6 +122,6 @@ def getInput():
         rawBoard = input("Enter board data: ").split(" ")
     else:
         rawBoard = sys.argv[1:]
-    board = [int(i) for i in rawBoard]
+    board = [int(i)-1 for i in rawBoard]
     return board
 
