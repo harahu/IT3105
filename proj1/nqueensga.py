@@ -1,36 +1,8 @@
 import random, time
+from tools import *
 
-class problemState():
-    """Contains information dependent on problem size to be looked up.
-    Should not be changed after initialization."""
-    def __init__(self, size):
-        self.size = size
-        self.comb = problemState.nC2List(size + 1)
-        self.target = self.comb[size]
-        self.diagCoords = problemState.diagonalCoordinates(size)
 
-    def nC2List(n):
-        """List of n choose 2 from 0 to n"""
-        l = []
-        for i in range(n):
-            l.append(int(i*(i-1)/2))
-        return(l)
-
-    def diagonalCoordinates(size):
-        """Returns a lookup table of diagonal coordinates for each board square. In
-        this context a diagonal coordinate is the diagonal number for the sqare, both
-        from NW to SE and SW to NE, ordered from west to east. Coordinate location in
-        the table is given by standard column and rom number."""
-        diagCoords = [[[0 for i in range(2)] for j in range(size)] for k in range(size)]
-        for col in range(size):
-            for row in range(size):
-                #NW to SE diagonal
-                diagCoords[col][row][0] = col - row + size - 1
-                #SW to NE diagonal
-                diagCoords[col][row][1] = col + row
-        return diagCoords
-
-class boardState():
+class BoardState():
     def __init__(self, pS, **kwargs):
         self.pS = pS
         self.board = kwargs.get('board')
@@ -62,30 +34,6 @@ class boardState():
         newBoard[cols[1]] = self.board[cols[0]]
         neighbour = boardState(self.pS, board=newBoard)
         return neighbour
-
-def repair(board):
-    rows = [0 for i in range(len(board))]
-    fix = [False for i in range(len(board))]
-    repaired = [-1 for i in range(len(board))]
-    for i in range(len(board)):
-        if rows[board[i]] == 0:
-            repaired[i] = board[i]
-        else:
-            fix[i] = True
-        rows[board[i]] += 1
-    unused = []
-    for i in range(len(rows)):
-        if rows[i] == 0:
-            unused.append(i)
-    random.shuffle(unused)
-    j = 0
-    for i in range(len(fix)):
-        if fix[i]:
-            repaired[i] = unused[j]
-            j += 1
-    return repaired
-
-
 
 def initializePopulation(bS, pS, popSize):
     population = []
@@ -205,8 +153,8 @@ def nQueensGenAlg(initPop, pS, itr):
 
 def main():
     inBoard = [i for i in range(30)]
-    pS = problemState(len(inBoard))
-    bS = boardState(pS, board=inBoard)
+    pS = ProblemState(len(inBoard))
+    bS = BoardState(pS, board=inBoard)
     initPop = initializePopulation(bS, pS, 100)
     start = time.clock()
     solutions = nQueensGenAlg(initPop, pS, 1000000)

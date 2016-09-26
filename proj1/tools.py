@@ -39,9 +39,15 @@ def printSolutions(solutions):
     for solution in solutions:
         print('>>', end=' ')
         for col in solution:
-            print(col, end=' ')
+            print(col+1, end=' ')
         print('\n')
     print(str(len(solutions))+" solutions found")
+
+def printBoard(board):
+    for col in board:
+            print(col+1, end=' ')
+        print('\n')
+
 
 def printRuntime(runTime):
     if runTime < 1:

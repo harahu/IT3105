@@ -58,36 +58,40 @@ class BoardState():
         neighbour = BoardState(self.pS, board=newBoard)
         return neighbour
 
-def nQueensSimAnn(pS, bS, itr, initTmp, a):
+def nQueensSimAnn(pS, bS, itr, initTmp, a, steps):
     """
     Implementation of Simulated Annealing for the n queens domain
-    Input: ProblemState, BoardState, int, double/int, double
+    Input: ProblemState, BoardState, int, double/int, double, boolean
     Output: Set of tuples
     """
     t = initTmp
     solutions = set([])
     for i in range(itr):
+        print("Iteration: "+str(i), end='') if steps else 0
+        printBoard(bS.board) if steps else 0
+        input() if steps else 0
         if bS.energy == pS.target:
             derivates = expandSolution(bS.board)
             for solution in derivates:
                 solutions.add(tuple(solution))
         candidate = bS.neighbour()
         dE = bS.energy - candidate.energy
-        if (dE < 0) or (math.exp(-(dE/t)) > random.random()):
+        if (dE <= 0) or (math.exp(-(dE/t)) > random.random()):
             bS = candidate
         t *= a
     return solutions
         
 def main():
-    #inBoard = getInput()
-    inBoard = [i for i in range(30)]
-    inBoard = repair(inBoard)
+    steps = askForStep()
+    startBoard = getInput()
+    #startBoard = [i for i in range(30)]
+    startBoard = repair(startBoard)
     
     pS = ProblemState(len(inBoard))
     bS = BoardState(pS, board=inBoard)
     
     start = time.clock()
-    solutions = nQueensSimAnn(pS, bS, 500000, 1000, 0.99)
+    solutions = nQueensSimAnn(pS, bS, 500000, 1000, 0.99, steps)
     end = time.clock()
     printSolutions(solutions)
     printRuntime(end - start)
