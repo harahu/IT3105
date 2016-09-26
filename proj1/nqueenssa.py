@@ -67,10 +67,14 @@ def nQueensSimAnn(pS, bS, itr, initTmp, a, steps):
     t = initTmp
     solutions = set([])
     for i in range(itr):
-        print("Iteration: "+str(i)) if steps else 0
-        printBoard(bS.board) if steps else 0
-        input() if steps else 0
+        if steps:
+            print("Iteration: "+str(i))
+            printBoard(bS.board)
         if bS.energy == pS.target:
+            if steps:
+                print("Solution found")
+                input()
+            solutions.add(tuple(bS.board))
             derivates = expandSolution(bS.board)
             for solution in derivates:
                 solutions.add(tuple(solution))
@@ -83,8 +87,8 @@ def nQueensSimAnn(pS, bS, itr, initTmp, a, steps):
         
 def main():
     steps = askForStep()
-    startBoard = getInput()
-    #startBoard = [i for i in range(30)]
+    #startBoard = getInput()
+    startBoard = [0 for i in range(18)]
     startBoard = repair(startBoard)
     
     pS = ProblemState(len(startBoard))
@@ -93,6 +97,7 @@ def main():
     start = time.clock()
     solutions = nQueensSimAnn(pS, bS, 500000, 1000, 0.99, steps)
     end = time.clock()
+
     printSolutions(solutions)
     printRuntime(end - start)
     
