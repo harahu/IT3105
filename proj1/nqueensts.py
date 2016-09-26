@@ -131,16 +131,12 @@ def main():
     bS = BoardState(pS, board=startBoard)
     tS = TabuState(pS, 3)
     
-    for w in range(1, 2, 1):
-        startTime = time.clock()
-        solutions = nQueensTabuSearch(pS, bS, tS, 100, ltmWeight=(w/10), steps=steps)
-        endTime = time.clock()
-    
-        #print(tS.moveCount)
-        #print(pS.target)
-        print("Used " + str(w/10) + " as weight")
-        #print("Runtime: "+str(endTime - startTime)+" seconds\n")
-        print("Found " + str(len(solutions)) + " solutions")
+    startTime = time.clock()
+    solutions = nQueensTabuSearch(pS, bS, tS, 4000, ltmWeight=0.1, steps=steps)
+    endTime = time.clock()
+
+    printRuntime(endTime-startTime)
+    print("Found " + str(len(solutions)) + " solutions")
     
     
 
