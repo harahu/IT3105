@@ -243,6 +243,10 @@ int main(int argc, char** argv) {
     
     // Add initial board to lookup table
     for (int pos = 0; pos < startboard->numQueens; pos++) {
+        if (checkPos(hlup, d1lup, d2lup, n, pos, qdata[pos]-1) == 0) {
+            printf("Found 0 solutions\n");
+            exit(0);
+        }
         addPos(hlup, d1lup, d2lup, n, pos, qdata[pos]-1);
     }
     
