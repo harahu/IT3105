@@ -69,6 +69,7 @@ def nQueensSimAnn(pS, bS, itr, initTmp, a, steps):
     for i in range(itr):
         if steps:
             print("Iteration: "+str(i))
+            print("Temperature: "+str(t))
             printBoard(bS.board)
         if bS.energy == pS.target:
             if steps:
@@ -83,12 +84,14 @@ def nQueensSimAnn(pS, bS, itr, initTmp, a, steps):
         if (dE <= 0) or (math.exp(-(dE/t)) > random.random()):
             bS = candidate
         t *= a
+        if steps:
+            print("----------------")
     return solutions
         
 def main():
     steps = askForStep()
     #startBoard = getInput()
-    startBoard = [0 for i in range(18)]
+    startBoard = [0 for i in range(30)]
     startBoard = repair(startBoard)
     
     pS = ProblemState(len(startBoard))
