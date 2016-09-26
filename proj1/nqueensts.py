@@ -120,7 +120,7 @@ def nQueensTabuSearch(pS, bS, tS, iterations, ltmWeight=0.1):
 
 def main():
     #startBoard = getInput()
-    startBoard = [i for i in range(30)]
+    startBoard = [i for i in range(40)]
     startBoard = repair(startBoard)
     
     pS = ProblemState(len(startBoard))
