@@ -68,9 +68,14 @@ def stocasticUniversalSampling(population, n):
 
 
 def crossover(p1, p2, pS):
+    """
+    Order1 crossover with population diversifying
+    """
     switches = random.sample(range(pS.size+1), 2)
     switches.sort()
     cb = p2.board[:]
+    if p1.board == p2.board:
+        random.shuffle(cb)
     for col in p1.board[switches[0]:switches[1]]:
         remove = -1
         for i in range(len(cb)):
@@ -81,40 +86,14 @@ def crossover(p1, p2, pS):
     ncb.extend(p1.board[switches[0]:switches[1]])
     ncb.extend(cb[switches[0]:])
     child = BoardState(pS, board=ncb)
-    """
-    print(switches)
-    print(p1.board)
-    print(p2.board)
-    print(child.board)
-    input()
-    """
     return child
-
-"""
-def crossover(p1, p2, pS):
-    switches = random.sample(range(pS.size), 2)
-    switches.sort()
-    cb = p1.board[:switches[0]]
-    cb.extend(p2.board[switches[0]:switches[1]])
-    cb.extend(p1.board[switches[1]:])
-    cb = repair(cb)
-    child = BoardState(pS, board=cb)
-    return child
-
-def crossover(p1, p2, pS):
-    cb = [i for i in range(pS.size)]
-    random.shuffle(cb)
-    for i in range(pS.size):
-        if p1.board[i] == p2.board[i]:
-            for j in range(pS.size):
-                if cb[j] == p1.board[i]:
-                    cb[j] = cb[i]
-                    cb[i] = p1.board[i]
-    child = BoardState(pS, board=cb)
-    return child
-"""
 
 def tournament(population, solutions, pS):
+    """
+    Runs tournament on three random individuals.
+    Worst individual is killed and replaced with
+    reproduction result from the others.
+    """
     kill = -1
     low = pS.target
     tourney = random.sample(range(len(population)),  3)
@@ -126,7 +105,7 @@ def tournament(population, solutions, pS):
             tC = j
     del tourney[tC]
     parent = random.sample(tourney, 1)
-    if random.random() < 0.99:
+    if random.random() < 0.10:
         population[kill] = population[parent[0]].mutate()
     else:
         population[kill] = crossover(population[tourney[0]], population[tourney[1]], pS)
@@ -134,21 +113,31 @@ def tournament(population, solutions, pS):
         population[kill] = population[kill].mutate()
     if population[kill].energy == pS.target:
         solutions.add(tuple(population[kill].board))
+        derivates = expandSolution(population[kill].board)
+        for solution in derivates:
+            solutions.add(tuple(solution))
 
 def nuclearAccident(population, solutions, pS):
-    for j in range(len(population)):
-        population[j] = population[j].mutate()
+    """
+    Mutates the entire population to a small degree,
+    to keep it diversified.
+    """
+    for i in range(len(population)):
+        population[i] = population[i].mutate()
         if random.random() < 0.50:
-            population[j] = population[j].mutate()
-        if population[j].energy == pS.target:
-            solutions.add(tuple(population[j].board))
+            population[i] = population[i].mutate()
+        if population[i].energy == pS.target:
+            solutions.add(tuple(population[i].board))
+            derivates = expandSolution(population[i].board)
+            for solution in derivates:
+                solutions.add(tuple(solution))
 
-def nQueensGenAlg(initPop, pS, itr, nuclearSafetyBuget):
+def nQueensGenAlg(initPop, pS, itr, nuclearSafetyBudget, steps):
     population = initPop
     solutions = set([])
     for i in range(itr):
         tournament(population, solutions, pS)
-        if i % nuclearSafetyBuget == 0:
+        if i % nuclearSafetyBudget == 0:
             nuclearAccident(population, solutions, pS)
         print(len(solutions), end='\r')
     return solutions
@@ -164,7 +153,7 @@ def main():
     initPop = initializePopulation(bS, pS, 1000)
 
     start = time.clock()
-    solutions = nQueensGenAlg(initPop, pS, 1200000, 300000)
+    solutions = nQueensGenAlg(initPop, pS, 1200000, 300000, steps)
     end = time.clock()
 
     printSolutions(solutions)
