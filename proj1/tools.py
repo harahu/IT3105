@@ -44,6 +44,7 @@ def printSolutions(solutions):
     print(str(len(solutions))+" solutions found")
 
 def printBoard(board):
+    print('>>', end=' ')
     for col in board:
         print(col+1, end=' ')
     print('\n')
