@@ -32,13 +32,13 @@ class BoardState():
         newBoard = self.board[:]
         newBoard[cols[0]] = self.board[cols[1]]
         newBoard[cols[1]] = self.board[cols[0]]
-        neighbour = boardState(self.pS, board=newBoard)
+        neighbour = BoardState(self.pS, board=newBoard)
         return neighbour
 
 def initializePopulation(bS, pS, popSize):
     population = []
     repaired = repair(bS.board)
-    bS = boardState(pS, board=repaired)
+    bS = BoardState(pS, board=repaired)
     population.append(bS)
     for i in range(popSize-1):
         derivative = bS.mutate().mutate()
@@ -66,6 +66,31 @@ def stocasticUniversalSampling(population, n):
     pointers = [(sP + i*pD) for i in range(n-1)]
     return rouletteWheelSelection(population, pointers)
 
+
+def crossover(p1, p2, pS):
+    switches = random.sample(range(pS.size+1), 2)
+    switches.sort()
+    cb = p2.board[:]
+    for col in p1.board[switches[0]:switches[1]]:
+        remove = -1
+        for i in range(len(cb)):
+            if cb[i] == col:
+                remove = i
+        del cb[remove]
+    ncb = cb[:switches[0]]
+    ncb.extend(p1.board[switches[0]:switches[1]])
+    ncb.extend(cb[switches[0]:])
+    child = BoardState(pS, board=ncb)
+    """
+    print(switches)
+    print(p1.board)
+    print(p2.board)
+    print(child.board)
+    input()
+    """
+    return child
+
+"""
 def crossover(p1, p2, pS):
     switches = random.sample(range(pS.size), 2)
     switches.sort()
@@ -73,10 +98,9 @@ def crossover(p1, p2, pS):
     cb.extend(p2.board[switches[0]:switches[1]])
     cb.extend(p1.board[switches[1]:])
     cb = repair(cb)
-    child = boardState(pS, board=cb)
+    child = BoardState(pS, board=cb)
     return child
 
-"""
 def crossover(p1, p2, pS):
     cb = [i for i in range(pS.size)]
     random.shuffle(cb)
@@ -86,81 +110,65 @@ def crossover(p1, p2, pS):
                 if cb[j] == p1.board[i]:
                     cb[j] = cb[i]
                     cb[i] = p1.board[i]
-    child = boardState(pS, board=cb)
+    child = BoardState(pS, board=cb)
     return child
 """
 
-def reproduce(parents, n, crossRate, mutationRate, pS):
-    children = []
-    for i in range(n):
-        parent = parents[(i % len(parents))]
-        if random.random() <= crossRate:
-            randParent = parents[random.randint(0, len(parents)-1)]
-            child = crossover(parent, randParent, pS)
-        else:
-            child = parent
-        if random.random() < mutationRate:
-            child = child.mutate()
-        children.append(child)
-    return children
+def tournament(population, solutions, pS):
+    kill = -1
+    low = pS.target
+    tourney = random.sample(range(len(population)),  3)
+    tC = -1
+    for j in range(len(tourney)):
+        if population[tourney[j]].energy < low:
+            kill = tourney[j]
+            low = population[tourney[j]].energy
+            tC = j
+    del tourney[tC]
+    parent = random.sample(tourney, 1)
+    if random.random() < 0.99:
+        population[kill] = population[parent[0]].mutate()
+    else:
+        population[kill] = crossover(population[tourney[0]], population[tourney[1]], pS)
+    if random.random() < 0.02:
+        population[kill] = population[kill].mutate()
+    if population[kill].energy == pS.target:
+        solutions.add(tuple(population[kill].board))
 
-def tourney(pop):
-    best = None
-    maxEng = 0
-    for bS in pop:
-        if bS.energy > maxEng:
-            best = bS
-            maxEng = bS.energy
-    return best
+def nuclearAccident(population, solutions, pS):
+    for j in range(len(population)):
+        population[j] = population[j].mutate()
+        if random.random() < 0.50:
+            population[j] = population[j].mutate()
+        if population[j].energy == pS.target:
+            solutions.add(tuple(population[j].board))
 
-
-def nQueensGenAlg(initPop, pS, itr):
+def nQueensGenAlg(initPop, pS, itr, nuclearSafetyBuget):
     population = initPop
     solutions = set([])
     for i in range(itr):
-        kill = -1
-        low = pS.target
-        tourney = random.sample(range(len(population)),  3)
-        tC = -1
-        for j in range(len(tourney)):
-            if population[tourney[j]].energy < low:
-                kill = tourney[j]
-                low = population[tourney[j]].energy
-                tC = j
-        del tourney[tC]
-        parent = random.sample(tourney, 1)
-        if random.random() < 0.99:
-            population[kill] = population[parent[0]].mutate()
-        else:
-            population[kill] = crossover(population[tourney[0]], population[tourney[1]], pS)
-        if random.random() < 0.02:
-            population[kill] = population[kill].mutate()
-        if population[kill].energy == pS.target:
-                solutions.add(tuple(population[kill].board))
-                print(str(len(solutions))+" "+str(i))
-        #reactor meltdown
-        
-        if i % 50000 == 0:
-            for j in range(len(population)):
-                population[j] = population[j].mutate()
-                if random.random() < 0.50:
-                    population[j] = population[j].mutate()
-                if population[j].energy == pS.target:
-                    solutions.add(tuple(population[j].board))
-                    print(str(len(solutions))+" "+str(i))
-        
+        tournament(population, solutions, pS)
+        if i % nuclearSafetyBuget == 0:
+            nuclearAccident(population, solutions, pS)
+        print(len(solutions), end='\r')
     return solutions
 
 def main():
-    inBoard = [i for i in range(30)]
-    pS = ProblemState(len(inBoard))
-    bS = BoardState(pS, board=inBoard)
-    initPop = initializePopulation(bS, pS, 100)
+    steps = askForStep()
+    #startBoard = getInput()
+    startBoard = [0 for i in range(30)]
+    startBoard = repair(startBoard)
+    
+    pS = ProblemState(len(startBoard))
+    bS = BoardState(pS, board=startBoard)
+    initPop = initializePopulation(bS, pS, 1000)
+
     start = time.clock()
-    solutions = nQueensGenAlg(initPop, pS, 1000000)
+    solutions = nQueensGenAlg(initPop, pS, 1200000, 300000)
     end = time.clock()
-    print(len(solutions))
-    print("Runtime: "+str(end - start)+" seconds\n")
+
+    printSolutions(solutions)
+    printRuntime(end - start)
 
 if __name__ == '__main__':
     main()
