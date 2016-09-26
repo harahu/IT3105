@@ -125,3 +125,13 @@ def getInput():
     board = [int(i)-1 for i in rawBoard]
     return board
 
+def askForStep():
+    """
+    Ask user if program should be stepped
+    Output: Boolean
+    """
+    answere = input("Run with stepped? (y/N) ")
+    if answere == 'y':
+        return True
+    return False
+
