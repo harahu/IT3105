@@ -124,8 +124,10 @@ def getInput():
     Output: List
     """
     if len(sys.argv) == 1:
-        int(input("Specify board size: ")) # to meet requirement
+        n = int(input("Specify board size: ")) # to meet requirement
         rawBoard = input("Enter board data: ").split(" ")
+        if len(rawBoard) != n: # will add '0' if given list too short
+            rawBoard += ['0' for i in range(n-len(rawBoard))]
     else:
         rawBoard = sys.argv[1:]
     board = [int(i)-1 for i in rawBoard]
