@@ -72,6 +72,9 @@ def nQueensTabuSearch(pS, bS, tS, iterations, ltmWeight=0.1, steps=False):
     bestBoard = bS
     solutions = set()
     
+    print("Starting board: ", end='') if steps else 0
+    printBoard(bS.board) if steps else 0
+    
     for i in range(iterations):
         print("iteration: "+str(i), end='') if steps else 0
         input() if steps else 0
@@ -114,7 +117,7 @@ def nQueensTabuSearch(pS, bS, tS, iterations, ltmWeight=0.1, steps=False):
             solutions.add(tuple(bestNeighbour.board))
             for s in expandSolution(bestNeighbour.board):
                 solutions.add(tuple(s))
-            #print(len(solutions))
+            print(len(solutions), end='\r')
         
         tS.insertTabu(bestMove)
     
@@ -132,7 +135,7 @@ def main():
     tS = TabuState(pS, 3)
     
     startTime = time.clock()
-    solutions = nQueensTabuSearch(pS, bS, tS, 4000, ltmWeight=0.1, steps=steps)
+    solutions = nQueensTabuSearch(pS, bS, tS, 1000, ltmWeight=0.1, steps=steps)
     endTime = time.clock()
 
     printRuntime(endTime-startTime)
