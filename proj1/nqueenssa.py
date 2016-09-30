@@ -90,8 +90,8 @@ def nQueensSimAnn(pS, bS, itr, initTmp, a, steps):
         
 def main():
     steps = askForStep()
-    #startBoard = getInput()
-    startBoard = [0 for i in range(30)]
+    startBoard = getInput()
+    #startBoard = [0 for i in range(30)]
     startBoard = repair(startBoard)
     
     pS = ProblemState(len(startBoard))
