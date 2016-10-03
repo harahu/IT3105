@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-I. -Wall
+CFLAGS=-I. -O3 -Wall -pthread
 DEPS = part2.h
 OBJ = part2.o
 

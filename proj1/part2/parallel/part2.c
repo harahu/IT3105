@@ -13,11 +13,23 @@ INPUT:
 #include <stdlib.h>
 #include <string.h>
 
+#include <pthread.h>
+
 #include "part2.h"
 
 
 #define MAX_INPUT_SIZE 128
 #define STEPS 0  // 1 - pauses every step, 0 - no pause
+
+/* Threading specific global variables */
+int numThreads;
+pthread_t *threads;
+pthread_mutex_t nsolsmutex;
+
+/* Global variables used */
+Board_t *startboard;
+int *sumnsols;
+int *chunks; // Array containing the work chunk portions 
 
 /* Convert a string to integer
  * Expects a single integer without any spaces
@@ -91,54 +103,69 @@ void printBoard_t(Board_t *board, int ending) {
         printf("\n");
 }
 
+/* Allocate arrays to be used in Lookup_t */
+void initLookupTable(Lookup_t *lup, int n) {
+    lup->hlist = (int*)calloc(n, sizeof(int));
+    lup->hlup = (int**)malloc(sizeof(int*)*n*n);
+    lup->d1list = (int*)calloc((n*2-1), sizeof(int));
+    lup->d1lup = (int**)malloc(sizeof(int*)*n*n);
+    lup->d2list = (int*)calloc((n*2-1), sizeof(int));
+    lup->d2lup = (int**)malloc(sizeof(int*)*n*n);
+}
+
 /* Generate lookup table */
-void generateLup(int *hlist, int **hlup, int *d1list, int **d1lup, int *d2list, int **d2lup, int n) {
+void generateLup(Lookup_t *lup, int n) {
     // Initialize horizontal list
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < n; j++) {
-            hlup[i*n + j] = &hlist[i];
+            lup->hlup[i*n + j] = &(lup->hlist[i]);
         }
     }
     
     // Initialize first diagonal list
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < n; j++) {
-            d1lup[i*n + j] = &d1list[i+j];
+            lup->d1lup[i*n + j] = &(lup->d1list[i+j]);
         }
     }
     
     // Initialize second diagonal list
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < n; j++) {
-            d2lup[i*n + j] = &d2list[(n-i-1)+j];
+            lup->d2lup[i*n + j] = &(lup->d2list[(n-i-1)+j]);
         }
     }
 }
 
 /* Add position to lookup table */
-void addPos(int **hlup, int **d1lup, int **d2lup, int n, int col, int row){
-    *hlup[row*n + col] = 1;
-    *d1lup[row*n + col] = 1;
-    *d2lup[row*n + col] = 1;
+void addPos(Lookup_t *lup, int col, int row){
+    int n = startboard->size;
+    *(lup->hlup)[row*n + col] = 1;
+    *(lup->d1lup)[row*n + col] = 1;
+    *(lup->d2lup)[row*n + col] = 1;
 }
 
 /* Remove position from lookup table */
-void remPos(int **hlup, int **d1lup, int **d2lup, int n, int col, int row){
-    *hlup[row*n + col] = 0;
-    *d1lup[row*n + col] = 0;
-    *d2lup[row*n + col] = 0;
+void remPos(Lookup_t *lup, int col, int row){
+    int n = startboard->size;
+    *(lup->hlup)[row*n + col] = 0;
+    *(lup->d1lup)[row*n + col] = 0;
+    *(lup->d2lup)[row*n + col] = 0;
 }
 
 /* Check position in lookup table */
-int checkPos(int **hlup, int **d1lup, int **d2lup, int n, int col, int row){
-    return (1-*hlup[row*n + col]) * (1-*d1lup[row*n + col]) * (1-*d2lup[row*n + col]);
+int checkPos(Lookup_t *lup, int col, int row){
+    int n = startboard->size;
+    return (1-*(lup->hlup)[row*n + col]) * (1-*(lup->d1lup)[row*n + col]) * (1-*(lup->d2lup)[row*n + col]);
 }
 
 /* Backtracking recursive function */
-void backtrack(Board_t *board, int **hlup, int **d1lup, int **d2lup, int *nsols) {
+void backtrack(Board_t *board, Lookup_t *lup, int *nsols, long myID) {
     Board_t *curboard = copy_Board_t(board);
     int size = curboard->size;
     int pos = curboard->numQueens;
+    int startRow;
+    int stopRow;
     
     if (STEPS) {
         printBoard_t(curboard, 0);
@@ -146,10 +173,18 @@ void backtrack(Board_t *board, int **hlup, int **d1lup, int **d2lup, int *nsols)
         getchar();
     }
     
+    if (pos != startboard->numQueens) {
+        startRow = 1;
+        stopRow = size+1;
+    } else {
+        startRow = chunks[myID];
+        stopRow = chunks[myID+1];
+    }
+    
     curboard->numQueens++;
-    for (int i = 1; i < size+1; i++) { // loop rows
+    for (int i = startRow; i < stopRow; i++) { // loop rows
         curboard->array[pos] = i;
-        if (checkPos(hlup, d1lup, d2lup, curboard->size, pos, i-1) == 1) {
+        if (checkPos(lup, pos, i-1) == 1) {
             // current board is fine
             
             if (STEPS) {
@@ -158,10 +193,11 @@ void backtrack(Board_t *board, int **hlup, int **d1lup, int **d2lup, int *nsols)
                 getchar();
             }
             
-            addPos(hlup, d1lup, d2lup, curboard->size, pos, i-1);
+            addPos(lup, pos, i-1);
             if (curboard->array[size-1] != 0) {
                 // solution to n-queen
                 (*nsols)++;
+                /*
                 if (STEPS) {
                     printBoard_t(curboard, 0);
                     printf(" This board is a soluton");
@@ -169,9 +205,9 @@ void backtrack(Board_t *board, int **hlup, int **d1lup, int **d2lup, int *nsols)
                 } else {
                     printBoard_t(curboard, 0);
                     printf(" is a solution\n");
-                }
+                }*/
             } else {
-                backtrack(curboard, hlup, d1lup, d2lup, nsols); // go further in
+                backtrack(curboard, lup, nsols, myID); // go further in
                 // no (more) solutions further in using curboard
                 if (STEPS) {
                     printBoard_t(curboard, 0);
@@ -179,30 +215,53 @@ void backtrack(Board_t *board, int **hlup, int **d1lup, int **d2lup, int *nsols)
                     getchar();
                 }
             }
-            remPos(hlup, d1lup, d2lup, curboard->size, pos, i-1);
+            remPos(lup, pos, i-1);
         }
     }
     freeBoard(curboard);
     // no (more) solutions further in using board
 }
 
+/* Every thread will run this function */
+void *runThread(void *tid) {
+    long myID = (long) tid;
+    int *nsols = malloc(sizeof(int));
+    
+    Lookup_t *lup = malloc(sizeof(Lookup_t));
+    
+    // Generate the lookup table
+    initLookupTable(lup, startboard->size);
+    generateLup(lup, startboard->size);
+    
+    // Add initial board to lookup table
+    for (int pos = 0; pos < startboard->numQueens; pos++) {
+        if (checkPos(lup, pos, startboard->array[pos]-1) == 0) {
+            printf("Found 0 solutions\n");
+            exit(0);
+        }
+        addPos(lup, pos, startboard->array[pos]-1);
+    }
+    
+    backtrack(startboard, lup, nsols, myID);
+    
+    pthread_mutex_lock(&nsolsmutex);
+    (*sumnsols) += (*nsols);
+    pthread_mutex_unlock(&nsolsmutex);
+}
+
 
 int main(int argc, char** argv) {
-    Board_t *startboard = (Board_t*)malloc(sizeof(Board_t));
-    int *nsols = (int*)malloc(sizeof(int)); // number of solutions
+    startboard = (Board_t*)malloc(sizeof(Board_t));
+    sumnsols = (int*)malloc(sizeof(int)); // number of solutions
     int n;
     int *qdata; // queen data (temporary list)
     
-    // Declare some variables to be used in lookup method
-    int *hlist; // Horizontal list
-    int **hlup; // Lookup table for horizontal list
-    int *d1list; // Down right list
-    int **d1lup;
-    int *d2list; // Down left list
-    int **d2lup;
-    
     // Get initial board
     if (argc == 1) {
+        char *threadsRaw = getInput("Specify the number of threads: ");
+        numThreads = toInt(threadsRaw);
+        free(threadsRaw);
+        
         char *nsizeRaw = getInput("Specify the n in n-queens: ");
         n = toInt(nsizeRaw);
         free(nsizeRaw);
@@ -211,11 +270,13 @@ int main(int argc, char** argv) {
         qdata = toIntArray(dataRaw, n);
         free(dataRaw);
     } else {
-        n = argc-1;
+        n = argc-2;
         qdata = (int*)malloc(sizeof(int)*n);
         
+        numThreads = toInt(argv[1]);
+        
         for (int i = 0; i < n; i++) {
-            qdata[i] = (int) (*argv[i+1] - '0');
+            qdata[i] = toInt(argv[i+2]);
         }
     }
     
@@ -232,27 +293,26 @@ int main(int argc, char** argv) {
         }
     }
     
-    // Generate the lookup table
-    hlist = (int*)calloc(n, sizeof(int));
-    hlup = (int**)malloc(sizeof(int*)*n*n);
-    d1list = (int*)calloc((n*2-1), sizeof(int));
-    d1lup = (int**)malloc(sizeof(int*)*n*n);
-    d2list = (int*)calloc((n*2-1), sizeof(int));
-    d2lup = (int**)malloc(sizeof(int*)*n*n);
-    generateLup(hlist, hlup, d1list, d1lup, d2list, d2lup, n);
-    
-    // Add initial board to lookup table
-    for (int pos = 0; pos < startboard->numQueens; pos++) {
-        if (checkPos(hlup, d1lup, d2lup, n, pos, qdata[pos]-1) == 0) {
-            printf("Found 0 solutions\n");
-            exit(0);
-        }
-        addPos(hlup, d1lup, d2lup, n, pos, qdata[pos]-1);
+    chunks = malloc(sizeof(int) * (numThreads+1));
+    chunks[0] = 1;
+    chunks[numThreads] = n+1;
+    for (int i = 1; i < numThreads; i++) {
+        chunks[i] = (int) i*n/numThreads;
     }
     
-    *nsols = 0; // initialize number of solutions
+    *sumnsols = 0; // initialize number of solutions
     
-    /* Ready to run backtrack algorithm */
-    backtrack(startboard, hlup, d1lup, d2lup, nsols);
-    printf("Found %i solutions\n", *nsols);
+    threads = (pthread_t*)malloc(sizeof(pthread_t) * numThreads);
+    
+    /* Generate threads and run runThread() */
+    for (long i = 0; i < numThreads; i++) {
+        pthread_create(&threads[i], NULL, runThread, (void*) i);
+    }
+    
+    /* Wait for threads to finish */
+    for (long i = 0; i < numThreads; i++) {
+        pthread_join(threads[i], NULL);
+    }
+    
+    printf("Found %i solutions\n", *sumnsols);
 }
