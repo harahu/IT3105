@@ -41,7 +41,7 @@ def main():
                 rewardWindow[i_episode % 99] = accumulatedReward
                 break
         #Decrease exploration rate 
-        epsilon *= 0.9995 # ends up at e = 0.005 after 8000 iterations
+        epsilon *= 0.9995 # ends up at e = 0.002 after 8000 iterations
         windowAvg = 0
         for i in rewardWindow:
             windowAvg += i
