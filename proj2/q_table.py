@@ -1,3 +1,5 @@
+import random
+
 class qTable:
     """
     Implements a table tracking the estimated values
@@ -23,7 +25,9 @@ class qTable:
 
     def getMaxQAction(self, s):
         """
-        Returns the action that has the highest Q-value
+        Returns a random action that has the highest Q-value
         for a given state.
         """
-        return self.table[s].index(max(self.table[s]))
+        max_q = self.getMaxQ(s)
+        all_actions = [i for i, x in enumerate(self.table[s]) if x == max_q]
+        return random.choice(all_actions)
