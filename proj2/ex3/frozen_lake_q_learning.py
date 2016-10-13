@@ -38,7 +38,7 @@ def main():
             qtab.setQ(prevObs, action, newQ)
             #Check if episode is done
             if done:
-                rewardWindow[i_episode % 99] = accumulatedReward
+                rewardWindow[i_episode % 100] = accumulatedReward
                 break
         #Decrease exploration rate 
         epsilon *= 0.9995 # ends up at e = 0.002 after 8000 iterations
@@ -48,8 +48,8 @@ def main():
         print(i_episode, " ", windowAvg)
         if windowAvg >= 78:
             break
-    print(epsilon)
-    print(qtab.table)
+    #print(epsilon)
+    #print(qtab.table)
 
 if __name__ == '__main__':
     main()
