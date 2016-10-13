@@ -1,3 +1,4 @@
+import os, sys
 import gym, random
 
 sys.path.append(os.path.split(os.getcwd())[0])
@@ -17,7 +18,7 @@ def main():
     env = gym.make('FrozenLake-v0')
     rewardWindow = [0 for _ in range(100)]
     qtab = qTable(env.observation_space.n, env.action_space.n)
-    epsilon = 1
+    epsilon = 0.1
     for i_episode in range(8000):
         observation = env.reset()
         accumulatedReward = 0
@@ -40,7 +41,7 @@ def main():
                 rewardWindow[i_episode % 99] = accumulatedReward
                 break
         #Decrease exploration rate 
-        epsilon *= 0.998
+        epsilon *= 0.9995 # ends up at e = 0.005 after 8000 iterations
         windowAvg = 0
         for i in rewardWindow:
             windowAvg += i
