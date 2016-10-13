@@ -14,7 +14,7 @@ def epsilonGreedy(epsilon, env, obs, qtab):
     return action
 
 def main():
-    env = gym.make('FrozenLake-v0')
+    env = gym.make('Taxi-v1')
     rewardWindow = [0 for _ in range(100)]
     qtab = qTable(env.observation_space.n, env.action_space.n)
     epsilon = 1

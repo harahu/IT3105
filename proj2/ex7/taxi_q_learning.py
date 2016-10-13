@@ -1,3 +1,4 @@
+import sys, os
 import gym, random
 
 sys.path.append(os.path.split(os.getcwd())[0])
@@ -14,7 +15,7 @@ def epsilonGreedy(epsilon, env, obs, qtab):
     return action
 
 def main():
-    env = gym.make('FrozenLake-v0')
+    env = gym.make('Taxi-v1')
     rewardWindow = [0 for _ in range(100)]
     qtab = qTable(env.observation_space.n, env.action_space.n)
     epsilon = 1
@@ -23,7 +24,7 @@ def main():
         accumulatedReward = 0
         for t in range(10000):
             #Render enviorment
-            #env.render()
+            env.render()
             #Select action
             action = epsilonGreedy(epsilon, env, observation, qtab)
             #Perform action
@@ -45,10 +46,10 @@ def main():
         for i in rewardWindow:
             windowAvg += i
         print(i_episode, " ", windowAvg)
-        if windowAvg >= 78:
+        if windowAvg >= 970:
             break
     print(epsilon)
-    print(qtab.table)
+    print(windowAvg)
 
 if __name__ == '__main__':
     main()
