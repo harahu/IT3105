@@ -1,4 +1,5 @@
-import gym, random, q_table
+import gym, random
+from q_table import qTable
 env = gym.make('FrozenLake-v0')
 observation = env.reset()
 q_table = qTable(env.action_space.n, env.observation_space.n)
