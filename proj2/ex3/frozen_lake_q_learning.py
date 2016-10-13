@@ -1,5 +1,6 @@
 import gym, random
 
+sys.path.append(os.path.split(os.getcwd())[0])
 from q_table import qTable
 
 LEARNING_RATE = 0.1
