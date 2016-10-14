@@ -52,11 +52,13 @@ def main():
         windowAvg = 0
         for i in rewardWindow:
             windowAvg += i
-        print(i_episode, " ", windowAvg)
+        print(i_episode, " ", windowAvg, end='\r')
         if windowAvg >= 78:
             break
     #print(epsilon)
     #print(qtab.table)
+    #print(i_episode)
+    print()
 
 if __name__ == '__main__':
     main()

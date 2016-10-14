@@ -1,3 +1,4 @@
+import sys, os
 import gym, random
 
 sys.path.append(os.path.split(os.getcwd())[0])
@@ -24,7 +25,7 @@ def main():
         accumulatedReward = 0
         for t in range(100):
             #Render enviorment
-            env.render()
+            #env.render()
             #Perform action
             prevObs = observation
             observation, reward, done, info = env.step(action)
@@ -46,11 +47,13 @@ def main():
         windowAvg = 0
         for i in rewardWindow:
             windowAvg += i
-        print(i_episode, " ", windowAvg)
+        print(i_episode, " ", windowAvg, end='\r')
         if windowAvg >= 78:
             break
-    print(epsilon)
-    print(qtab.table)
+    #print(epsilon)
+    #print(qtab.table)
+    #print(i_episode)
+    print()
 
 if __name__ == '__main__':
     main()
