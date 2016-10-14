@@ -1,5 +1,6 @@
 import os, sys
 import gym, random
+import json
 
 sys.path.append(os.path.split(os.getcwd())[0])
 from q_table import qTable
@@ -50,6 +51,13 @@ def main():
             break
     #print(epsilon)
     #print(qtab.table)
+    
+    """
+    Export qtable to json
+    """
+    f = open("ex3qtable.json", 'w')
+    f.write(json.dumps(qtab.table))
+    f.close()
 
 if __name__ == '__main__':
     main()
