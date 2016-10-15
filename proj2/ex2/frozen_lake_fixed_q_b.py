@@ -15,4 +15,3 @@ for t in range(10000):
     if done:
         print("Episode finished after {} timesteps".format(t+1))
         break
-print(env.observation_space.n)
