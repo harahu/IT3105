@@ -1,3 +1,4 @@
+import sys, os
 import gym, random
 
 sys.path.append(os.path.split(os.getcwd())[0])
@@ -17,14 +18,14 @@ def main():
     env = gym.make('Taxi-v1')
     rewardWindow = [0 for _ in range(100)]
     qtab = qTable(env.observation_space.n, env.action_space.n)
-    epsilon = 1
+    epsilon = 0.1
     for i_episode in range(8000):
         observation = env.reset()
         action = epsilonGreedy(epsilon, env, observation, qtab)
         accumulatedReward = 0
         for t in range(100):
             #Render enviorment
-            env.render()
+            #env.render()
             #Perform action
             prevObs = observation
             observation, reward, done, info = env.step(action)
@@ -39,18 +40,16 @@ def main():
             qtab.setQ(prevObs, prevAct, newQ)
             #Check if episode is done
             if done:
-                rewardWindow[i_episode % 99] = accumulatedReward
+                rewardWindow[i_episode % 100] = accumulatedReward
                 break
         #Decrease exploration rate 
-        epsilon *= 0.998
+        epsilon *= 0.9995
         windowAvg = 0
         for i in rewardWindow:
             windowAvg += i
         print(i_episode, " ", windowAvg)
-        if windowAvg >= 78:
+        if windowAvg >= 970:
             break
-    print(epsilon)
-    print(qtab.table)
 
 if __name__ == '__main__':
     main()
