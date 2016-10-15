@@ -18,7 +18,9 @@ def main():
     env = gym.make('FrozenLake-v0')
     rewardWindow = [0 for _ in range(100)]
     qtab = qTable(env.observation_space.n, env.action_space.n)
-    epsilon = 1
+    epsilon = 0.1
+    ep = []
+    rew = []
     for i_episode in range(8000):
         observation = env.reset()
         action = epsilonGreedy(epsilon, env, observation, qtab)
@@ -41,9 +43,11 @@ def main():
             #Check if episode is done
             if done:
                 rewardWindow[i_episode % 99] = accumulatedReward
+                ep.append(i_episode)
+                rew.append(accumulatedReward)
                 break
         #Decrease exploration rate 
-        epsilon *= 0.998
+        epsilon *= 0.9995
         windowAvg = 0
         for i in rewardWindow:
             windowAvg += i
