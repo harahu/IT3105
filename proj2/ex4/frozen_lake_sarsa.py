@@ -1,5 +1,6 @@
 import sys, os
 import gym, random
+import matplotlib.pyplot as plt
 
 sys.path.append(os.path.split(os.getcwd())[0])
 from q_table import qTable
@@ -44,20 +45,23 @@ def main():
             if done:
                 rewardWindow[i_episode % 99] = accumulatedReward
                 ep.append(i_episode)
-                rew.append(accumulatedReward)
                 break
         #Decrease exploration rate 
         epsilon *= 0.9995
         windowAvg = 0
         for i in rewardWindow:
             windowAvg += i
+        rew.append(windowAvg/100)
         print(i_episode, " ", windowAvg, end='\r')
         if windowAvg >= 78:
             break
-    #print(epsilon)
-    #print(qtab.table)
-    #print(i_episode)
-    print()
+    plt.plot(ep, rew)
+    plt.xlabel('episode')
+    plt.ylabel('reward')
+    plt.title('Frozen Lake SARSA')
+    plt.grid(True)
+    plt.savefig("sarsa.png")
+    plt.show()
 
 if __name__ == '__main__':
     main()

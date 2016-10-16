@@ -27,7 +27,7 @@ def main():
         accumulatedReward = 0
         for t in range(10000):
             #Render enviorment
-            #env.render()
+            env.render()
             #Select action
             action = epsilonGreedy(epsilon, env, observation, qtab)
             #Perform action
@@ -58,7 +58,7 @@ def main():
     plt.ylabel('reward')
     plt.title('Taxi Q learning')
     plt.grid(True)
-    plt.savefig("test.png")
+    plt.savefig("qlrn.png")
     plt.show()
 
 

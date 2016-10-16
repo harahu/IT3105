@@ -1,5 +1,6 @@
 import os, sys
 import gym, random
+import matplotlib.pyplot as plt
 import json
 
 sys.path.append(os.path.split(os.getcwd())[0])
@@ -20,6 +21,8 @@ def main():
     rewardWindow = [0 for _ in range(100)]
     qtab = qTable(env.observation_space.n, env.action_space.n)
     epsilon = 0.1
+    ep = []
+    rew = []
     for i_episode in range(8000):
         observation = env.reset()
         accumulatedReward = 0
@@ -40,6 +43,7 @@ def main():
             #Check if episode is done
             if done:
                 rewardWindow[i_episode % 100] = accumulatedReward
+                ep.append(i_episode)
                 break
         #Decrease exploration rate 
         epsilon *= 0.9995 # ends up at e = 0.002 after 8000 iterations
@@ -47,12 +51,16 @@ def main():
         for i in rewardWindow:
             windowAvg += i
         print(i_episode, " ", windowAvg, end='\r')
+        rew.append(windowAvg/100)
         if windowAvg >= 78:
             break
-    #print(epsilon)
-    #print(qtab.table)
-    #print(i_episode)
-    print()
+    plt.plot(ep, rew)
+    plt.xlabel('episode')
+    plt.ylabel('reward')
+    plt.title('Frozen Lake Q learning')
+    plt.grid(True)
+    plt.savefig("qlrn.png")
+    plt.show()
     
     """
     Export qtable to json
