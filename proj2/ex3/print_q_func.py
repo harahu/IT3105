@@ -12,7 +12,10 @@ class bcolors:
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
 
-qfuncjson = open(sys.argv[1], 'r').read()
+try:
+    qfuncjson = open(sys.argv[1], 'r').read()
+except IndexError:
+    qfuncjson = open("ex3qtable.json", 'r').read()
 qtable = json.loads(qfuncjson)
 
 table = [['S','F','F','F'],
