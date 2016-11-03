@@ -69,14 +69,14 @@ def euclidian_distance(a, b):
 
 def get_best_match_index(city, neuron_list):
     best = 0
-    best_dist = 0
+    best_dist = 10
 
     for i in range(len(neuron_list)):
         distance = euclidian_distance(city, neuron_list[i])
-        if distance > best_dist:
+        if distance < best_dist:
             best = i
             best_dist = distance
-
+            
     return best
 
 def train(weight, city, alpha, discount):
