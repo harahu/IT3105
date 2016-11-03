@@ -6,7 +6,7 @@ import matplotlib.animation as anim
 fig = plt.figure()
 ax = plt.axes(xlim=(0,1), ylim=(0,1))
 cities_plt, = ax.plot([], [], 'ro')
-neurons_plt, = ax.plot([], [], 'yo-')
+neurons_plt, = ax.plot([], [], 'yo-', zorder=2)
 
 def get_problem_set(filename):
     """Returns a list of max-normalized city coordinates"""
@@ -59,6 +59,9 @@ def add_anim(neurons_data, neurons):
     x = [neuron[0] for neuron in neurons]
     y = [neuron[1] for neuron in neurons]
     
+    x.append(neurons[0][0])
+    y.append(neurons[0][1])
+    
     neurons_data.append((x,y))
 
 def euclidian_distance(a, b):
@@ -83,15 +86,19 @@ def train(weight, city, alpha, discount):
 def main():
     #initialization
     raw_cities, cities = get_problem_set('wi29.tsp')
-    som_ring = [[random.random() for i in range(2)] for i in range(len(cities))]
+    #som_ring = [[random.random() for i in range(2)] for i in range(len(cities))]
+    som_ring = []
+    for i in range(len(cities)):
+        tetha = i / len(cities) * 2 * math.pi
+        som_ring.append([math.cos(tetha)/2 + 0.5, math.sin(tetha)/2 + 0.5])
     eta = 0.8
     delta = 6.2 + 0.037*len(cities)
     n_iterations = 50*len(cities)
-    frame_step = 10
+    frame_step = 1
     
     # for animation plot
     neurons_data = []
-
+    add_anim(neurons_data, som_ring)
     
     for i in range(n_iterations):
         city = random.choice(cities)
