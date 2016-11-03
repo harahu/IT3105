@@ -5,8 +5,8 @@ import matplotlib.animation as anim
 # for animation
 fig = plt.figure()
 ax = plt.axes(xlim=(0,1), ylim=(0,1))
-cities_plt, = ax.plot([], [], 'ro')
-neurons_plt, = ax.plot([], [], 'yo-', zorder=2)
+cities_plt, = ax.plot([], [], 'ro', zorder=2, alpha=0.4)
+neurons_plt, = ax.plot([], [], 'yo-', zorder=1)
 
 def get_problem_set(filename):
     """Returns a list of max-normalized city coordinates"""
