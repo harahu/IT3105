@@ -5,7 +5,7 @@ def get_problem_set(filename):
     """Returns a list of max-normalized city coordinates"""
     with open(filename, 'r') as f:
         inp = [line.rstrip('\n') for line in f]
-    inp = inp[7:len(inp)-1]
+    inp = inp[7:-2]
 
     for i in range(len(inp)):
         inp[i] = inp[i].split(' ')[1:]
