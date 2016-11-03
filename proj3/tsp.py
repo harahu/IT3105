@@ -7,6 +7,7 @@ fig = plt.figure()
 ax = plt.axes(xlim=(-0.2,1.2), ylim=(-0.2,1.2))
 cities_plt, = ax.plot([], [], 'ro', zorder=2, alpha=0.4)
 neurons_plt, = ax.plot([], [], 'yo-', zorder=1)
+distance_text = ax.text(-0.1, -0.1, "", transform=ax.transAxes)
 
 def get_problem_set(filename):
     """Returns a list of max-normalized city coordinates"""
@@ -46,16 +47,17 @@ def init_anim(cities):
     y = [city[1] for city in cities]
     cities_plt.set_data(x, y)
 
-def animate(i, neurons):
+def animate(i, neurons, distances):
     neurons_plt.set_data([], [])
     
     x = neurons[i][0]
     y = neurons[i][1]
     
     neurons_plt.set_data(x, y)
-    return cities_plt, neurons_plt
+    distance_text.set_text("Distance: %0.4f" %(distances[i]))
+    return cities_plt, neurons_plt, distance_text
 
-def add_anim(neurons_data, neurons):
+def add_anim(neurons_data, distance_data, neurons, cities, raw_cities):
     x = [neuron[0] for neuron in neurons]
     y = [neuron[1] for neuron in neurons]
     
@@ -63,6 +65,7 @@ def add_anim(neurons_data, neurons):
     y.append(neurons[0][1])
     
     neurons_data.append((x,y))
+    distance_data.append(calculate_total_distance(neurons, cities, raw_cities))
 
 def euclidian_distance(a, b):
     return math.sqrt(((a[0]-b[0])**2)+((a[1]-b[1])**2))
@@ -117,7 +120,8 @@ def train(weight, city, alpha, discount):
 
 def main():
     #initialization
-    raw_cities, cities = get_problem_set('wi29.tsp')
+    tspfile = "wi29.tsp"
+    raw_cities, cities = get_problem_set(tspfile)
     #som_ring = [[random.random() for i in range(2)] for i in range(len(cities))]
     som_ring = []
     for i in range(len(cities)*2):
@@ -130,7 +134,8 @@ def main():
     
     # for animation plot
     neurons_data = []
-    add_anim(neurons_data, som_ring)
+    distance_data = []
+    add_anim(neurons_data, distance_data, som_ring, cities, raw_cities)
     
     for i in range(n_iterations):
         #city = random.choice(cities)
@@ -152,15 +157,14 @@ def main():
             delta = 1
         
         if i % frame_step == 0:
-            add_anim(neurons_data, som_ring)
-            print(calculate_total_distance(som_ring, cities, raw_cities))
+            add_anim(neurons_data, distance_data, som_ring, cities, raw_cities)
     
     #plot_som_tsp(cities, som_ring)
     
     init_anim(cities)
-    ani = anim.FuncAnimation(fig, animate, frames=len(neurons_data), fargs=(neurons_data,))
+    ani = anim.FuncAnimation(fig, animate, frames=len(neurons_data), fargs=(neurons_data,distance_data,))
     
-    get_closest_city_list(som_ring, cities)
+    #ani.save("tsp_%s.mp4" %(tspfile), fps=30)
     plt.show()
 
 if __name__ == '__main__':
