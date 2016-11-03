@@ -1,5 +1,12 @@
 import math, random
 import matplotlib.pyplot as plt
+import matplotlib.animation as anim
+
+# for animation
+fig = plt.figure()
+ax = plt.axes(xlim=(0,1), ylim=(0,1))
+cities_plt, = ax.plot([], [], 'ro')
+neurons_plt, = ax.plot([], [], 'yo-')
 
 def get_problem_set(filename):
     """Returns a list of max-normalized city coordinates"""
@@ -32,6 +39,28 @@ def plot_som_tsp(cities, neurons):
     plt.plot(x1, y1, 'yo-')
     plt.show()
 
+def init_anim(cities):
+    cities_plt.set_data([], [])
+    
+    x = [city[0] for city in cities]
+    y = [city[1] for city in cities]
+    cities_plt.set_data(x, y)
+
+def animate(i, neurons):
+    neurons_plt.set_data([], [])
+    
+    x = neurons[i][0]
+    y = neurons[i][1]
+    
+    neurons_plt.set_data(x, y)
+    return cities_plt, neurons_plt
+
+def add_anim(neurons_data, neurons):
+    x = [neuron[0] for neuron in neurons]
+    y = [neuron[1] for neuron in neurons]
+    
+    neurons_data.append((x,y))
+
 def euclidian_distance(a, b):
     return math.sqrt(((a[0]-b[0])**2)+((a[1]-b[1])**2))
 
@@ -58,7 +87,12 @@ def main():
     eta = 0.8
     delta = 6.2 + 0.037*len(cities)
     n_iterations = 50*len(cities)
+    frame_step = 10
+    
+    # for animation plot
+    neurons_data = []
 
+    
     for i in range(n_iterations):
         city = random.choice(cities)
         match = get_best_match_index(city, som_ring)
@@ -76,7 +110,16 @@ def main():
             delta -= (6.2 + 0.037*len(cities))/(n_iterations*0.65)
         else:
             delta = 1
-    plot_som_tsp(cities, som_ring)
+        
+        if i % frame_step == 0:
+            add_anim(neurons_data, som_ring)
+    
+    #plot_som_tsp(cities, som_ring)
+    
+    init_anim(cities)
+    ani = anim.FuncAnimation(fig, animate, frames=len(neurons_data), fargs=(neurons_data,))
+    
+    plt.show()
 
 if __name__ == '__main__':
     main()
