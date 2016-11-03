@@ -94,14 +94,15 @@ def main():
     eta = 0.8
     delta = 6.2 + 0.037*len(cities)
     n_iterations = 50*len(cities)
-    frame_step = 1
+    frame_step = 30
     
     # for animation plot
     neurons_data = []
     add_anim(neurons_data, som_ring)
     
     for i in range(n_iterations):
-        city = random.choice(cities)
+        #city = random.choice(cities)
+        city = cities[i%len(cities)]
         match = get_best_match_index(city, som_ring)
 
         #train
