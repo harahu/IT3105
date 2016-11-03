@@ -13,7 +13,9 @@ def get_problem_set(filename):
     """Returns a list of max-normalized city coordinates"""
     with open(filename, 'r') as f:
         inp = [line.rstrip('\n') for line in f]
-    inp = inp[7:-2]
+    start = inp.index("NODE_COORD_SECTION") + 1
+    end = inp.index("EOF")
+    inp = inp[start:end]
 
     for i in range(len(inp)):
         inp[i] = inp[i].split(' ')[1:]
@@ -120,17 +122,18 @@ def train(weight, city, alpha, discount):
 
 def main():
     #initialization
-    tspfile = "wi29.tsp"
+    tspfile = "dj38.tsp"
     raw_cities, cities = get_problem_set(tspfile)
     #som_ring = [[random.random() for i in range(2)] for i in range(len(cities))]
     som_ring = []
-    for i in range(len(cities)*2):
-        tetha = i / len(cities) * 2 * math.pi
+    n_neurons = len(cities)*2
+    for i in range(n_neurons):
+        tetha = i / n_neurons * 2 * math.pi
         som_ring.append([math.cos(tetha)/2 + 0.5, math.sin(tetha)/2 + 0.5])
     eta = 0.8
     delta = 6.2 + 0.037*len(cities)
     n_iterations = 50*len(cities)
-    frame_step = 30
+    frame_step = len(cities)
     
     # for animation plot
     neurons_data = []
