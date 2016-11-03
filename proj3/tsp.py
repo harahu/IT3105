@@ -164,7 +164,10 @@ def main():
     init_anim(cities)
     ani = anim.FuncAnimation(fig, animate, frames=len(neurons_data), fargs=(neurons_data,distance_data,))
     
-    #ani.save("tsp_%s.mp4" %(tspfile), fps=30)
+    try:
+        ani.save("tsp_%s.mp4" %(tspfile), fps=15, bitrate=1000)
+    except:
+        print("probably need to install ffmpeg or some encoders")
     plt.show()
 
 if __name__ == '__main__':
