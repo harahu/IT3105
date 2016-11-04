@@ -2,6 +2,13 @@ import math, random
 import matplotlib.pyplot as plt
 import matplotlib.animation as anim
 
+"""What remains:
+1. plot at user specified intervals
+2. static, linear and exponential decay functions for learning rate and neighbourhood radius
+3. enable diagram generation for the report (3 for each problem set, best run)
+4. return total distance at user defined intervals
+"""
+
 # for animation
 fig = plt.figure()
 ax = plt.axes(xlim=(-0.2,1.2), ylim=(-0.2,1.2))
@@ -10,7 +17,7 @@ neurons_plt, = ax.plot([], [], 'yo-', zorder=1)
 distance_text = ax.text(-0.1, -0.1, "", transform=ax.transAxes)
 
 def get_problem_set(filename):
-    """Returns a list of max-normalized city coordinates"""
+    """Returns a list of city coordinates together with the 0,1-normalized version"""
     with open(filename, 'r') as f:
         inp = [line.rstrip('\n') for line in f]
     start = inp.index("NODE_COORD_SECTION") + 1
@@ -120,9 +127,14 @@ def train(weight, city, alpha, discount):
     weight[0] += alpha*discount*(city[0]-weight[0])
     weight[1] += alpha*discount*(city[1]-weight[1])
 
+def linear_decay(last, initial, n_iterations, end_factor):
+    """Returns the next step in a lineary decaying function.
+    end_factor indicates at what faction of the """
+    return last - initial/(n_iterations*end_factor)
+
 def main():
     #initialization
-    tspfile = "dj38.tsp"
+    tspfile = "uy734.tsp"
     raw_cities, cities = get_problem_set(tspfile)
     #som_ring = [[random.random() for i in range(2)] for i in range(len(cities))]
     som_ring = []
@@ -130,9 +142,11 @@ def main():
     for i in range(n_neurons):
         tetha = i / n_neurons * 2 * math.pi
         som_ring.append([math.cos(tetha)/2 + 0.5, math.sin(tetha)/2 + 0.5])
-    eta = 0.8
-    delta = 6.2 + 0.037*len(cities)
-    n_iterations = 50*len(cities)
+    init_eta = 0.8
+    eta = init_eta
+    init_delta = 6.2 + 0.037*2*len(cities)
+    delta = init_delta
+    n_iterations = 100*len(cities)
     frame_step = len(cities)
     
     # for animation plot
@@ -153,9 +167,9 @@ def main():
             train(som_ring[(match-distance) % len(som_ring)], city, eta, discount)
 
         #update parameters
-        eta -= (0.8/n_iterations)
+        eta = linear_decay(eta, init_eta, n_iterations, 1)
         if delta > 1:
-            delta -= (6.2 + 0.037*len(cities))/(n_iterations*0.65)
+            delta = linear_decay(delta, init_delta-1, n_iterations, 0.65)
         else:
             delta = 1
         
