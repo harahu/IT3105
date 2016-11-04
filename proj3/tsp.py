@@ -129,7 +129,8 @@ def train(weight, city, alpha, discount):
 
 def linear_decay(last, initial, n_iterations, end_factor):
     """Returns the next step in a lineary decaying function.
-    end_factor indicates at what faction of the """
+    end_factor indicates at what faction of the training process
+    the function should reach 0"""
     return last - initial/(n_iterations*end_factor)
 
 def main():
@@ -142,11 +143,12 @@ def main():
     for i in range(n_neurons):
         tetha = i / n_neurons * 2 * math.pi
         som_ring.append([math.cos(tetha)/2 + 0.5, math.sin(tetha)/2 + 0.5])
-    init_eta = 0.8
+    init_eta = 0.8 #learning rate
     eta = init_eta
-    init_delta = 6.2 + 0.037*2*len(cities)
+    init_delta = 6.2*2 + 0.037*2*len(cities) #neighbourhood radius
     delta = init_delta
     n_iterations = 100*len(cities)
+    decay_type = 1
     frame_step = len(cities)
     
     # for animation plot
@@ -167,12 +169,21 @@ def main():
             train(som_ring[(match-distance) % len(som_ring)], city, eta, discount)
 
         #update parameters
-        eta = linear_decay(eta, init_eta, n_iterations, 1)
-        if delta > 1:
-            delta = linear_decay(delta, init_delta-1, n_iterations, 0.65)
-        else:
-            delta = 1
-        
+        if decay_type == 0:
+            #static
+            pass
+        elif decay_type == 1:
+            #linear
+            eta = linear_decay(eta, init_eta, n_iterations, 1)
+            if delta > 1:
+                #should reach 1 by 65% competion
+                delta = linear_decay(delta, init_delta-1, n_iterations, 0.65)
+            else:
+                delta = 1
+        elif decay_type == 2:
+            #exponential
+            #implement
+
         if i % frame_step == 0:
             add_anim(neurons_data, distance_data, som_ring, cities, raw_cities)
     
