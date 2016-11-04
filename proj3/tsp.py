@@ -181,6 +181,7 @@ def main():
             else:
                 delta = 1
         elif decay_type == 2:
+            pass
             #exponential
             #implement
 
