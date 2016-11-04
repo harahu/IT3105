@@ -135,7 +135,8 @@ def linear_decay(last, initial, n_iterations, end_factor):
 
 def main():
     #initialization
-    tspfile = "uy734.tsp"
+    files = ("wi29.tsp", "dj38.tsp", "qa194.tsp", "uy734.tsp")
+    tspfile = files[2]
     raw_cities, cities = get_problem_set(tspfile)
     #som_ring = [[random.random() for i in range(2)] for i in range(len(cities))]
     som_ring = []
@@ -184,8 +185,10 @@ def main():
             pass
             #exponential
             #implement
+            pass
 
         if i % frame_step == 0:
+            print("Progress: %i%%" %(round(100*i/n_iterations)), end='\r')
             add_anim(neurons_data, distance_data, som_ring, cities, raw_cities)
     
     #plot_som_tsp(cities, som_ring)
@@ -193,11 +196,12 @@ def main():
     init_anim(cities)
     ani = anim.FuncAnimation(fig, animate, frames=len(neurons_data), fargs=(neurons_data,distance_data,))
     
+    plt.show()
     try:
+        print("Saving video ")
         ani.save("tsp_%s.mp4" %(tspfile), fps=15, bitrate=1000)
     except:
         print("probably need to install ffmpeg or some encoders")
-    plt.show()
 
 if __name__ == '__main__':
     main()
