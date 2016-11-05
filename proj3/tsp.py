@@ -133,6 +133,11 @@ def linear_decay(last, initial, n_iterations, end_factor):
     the function should reach 0"""
     return last - initial/(n_iterations*end_factor)
 
+def print_diagnostics(i, n_iterations, eta, delta):
+    print("Progress: %i%%" %(round(100*i/n_iterations)))
+    print("Eta: %f" %(eta))
+    print("Delta: %f" %(delta), end='\033[F\033[F')
+
 def main():
     #initialization
     files = ("wi29.tsp", "dj38.tsp", "qa194.tsp", "uy734.tsp")
@@ -187,20 +192,20 @@ def main():
             pass
 
         if i % frame_step == 0:
-            print("Progress: %i%%" %(round(100*i/n_iterations)))
-            print("\nEta: %f" %(eta))
-            print("\nDelta: %f" %(delta), end='\033[F\033[F\033[F\033[F')
+            print_diagnostics(i, n_iterations, eta, delta)
             add_anim(neurons_data, distance_data, som_ring, cities, raw_cities)
     
     #plot_som_tsp(cities, som_ring)
-    print('\n\n\n\n')
+    print_diagnostics(n_iterations, n_iterations, eta, delta)
+    print('\n\n\n----------')
     init_anim(cities)
     ani = anim.FuncAnimation(fig, animate, frames=len(neurons_data), fargs=(neurons_data,distance_data,))
     
     plt.show()
     try:
-        print("Saving video ")
+        print("Saving video...")
         ani.save("tsp_%s.mp4" %(tspfile), fps=15, bitrate=1000)
+        print("Done!")
     except:
         print("probably need to install ffmpeg or some encoders")
 
