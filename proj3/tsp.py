@@ -3,10 +3,8 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as anim
 
 """What remains:
-1. plot at user specified intervals
 2. static, linear and exponential decay functions for learning rate and neighbourhood radius
 3. enable diagram generation for the report (3 for each problem set, best run)
-4. return total distance at user defined intervals
 """
 
 # for animation
@@ -76,6 +74,13 @@ def add_anim(neurons_data, distance_data, neurons, cities, raw_cities):
     neurons_data.append((x,y))
     distance_data.append(calculate_total_distance(neurons, cities, raw_cities))
 
+def print_diagnostics(i, n_iterations, eta, delta):
+    print("Progress: %i%%" %(round(100*i/n_iterations)))
+    print("Eta: %f" %(eta))
+    print("Delta: %f" %(delta), end='\033[F\033[F')
+    if i == n_iterations-1:
+        print('\n\n\n----------')
+
 def euclidian_distance(a, b):
     return math.sqrt(((a[0]-b[0])**2)+((a[1]-b[1])**2))
 
@@ -129,16 +134,13 @@ def train(weight, city, alpha, discount):
 
 def linear_decay(last, initial, n_iterations, end_factor):
     """Returns the next step in a lineary decaying function.
-    end_factor indicates at what faction of the training process
+    end_factor indicates at what fraction of the training process
     the function should reach 0"""
     return last - initial/(n_iterations*end_factor)
 
-def print_diagnostics(i, n_iterations, eta, delta):
-    print("Progress: %i%%" %(round(100*i/n_iterations)))
-    print("Eta: %f" %(eta))
-    print("Delta: %f" %(delta), end='\033[F\033[F')
-    if i == n_iterations-1:
-        print('\n\n\n----------')
+def exponential_decay(initial, itr, factor):
+    """Returns the next step in a exponential decay function."""
+    return initial*math.exp(-(itr/factor))
 
 def main():
     #initialization
@@ -156,7 +158,7 @@ def main():
     init_delta = 6.2*2 + 0.037*2*len(cities) #neighbourhood radius
     delta = init_delta
     n_iterations = 100*len(cities)
-    decay_type = 1
+    decay_type = 2
     frame_step = len(cities)
     
     # for animation plot
@@ -188,16 +190,18 @@ def main():
             if delta < 1:
                 delta = 1
         elif decay_type == 2:
-            pass
             #exponential
-            #implement
-            pass
+            eta = exponential_decay(init_eta, i, len(cities)*15)
+            delta = exponential_decay(init_delta, i, len(cities)*15)
+            if delta < 1:
+                delta = 1
+        else:
+            print('What are you even trying to do? -_-')
 
         if (i+1) % frame_step == 0:
             print_diagnostics(i, n_iterations, eta, delta)
             add_anim(neurons_data, distance_data, som_ring, cities, raw_cities)
     
-    #plot_som_tsp(cities, som_ring)
     init_anim(cities)
     ani = anim.FuncAnimation(fig, animate, frames=len(neurons_data), fargs=(neurons_data,distance_data,))
     
