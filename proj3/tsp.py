@@ -176,10 +176,9 @@ def main():
         elif decay_type == 1:
             #linear
             eta = linear_decay(eta, init_eta, n_iterations, 1)
-            if delta > 1:
-                #should reach 1 by 65% competion
-                delta = linear_decay(delta, init_delta-1, n_iterations, 0.65)
-            else:
+            #should reach 1 by 65% competion
+            delta = linear_decay(delta, init_delta-1, n_iterations, 0.65)
+            if delta < 1:
                 delta = 1
         elif decay_type == 2:
             pass
@@ -188,11 +187,13 @@ def main():
             pass
 
         if i % frame_step == 0:
-            print("Progress: %i%%" %(round(100*i/n_iterations)), end='\r')
+            print("Progress: %i%%" %(round(100*i/n_iterations)))
+            print("\nEta: %f" %(eta))
+            print("\nDelta: %f" %(delta), end='\033[F\033[F\033[F\033[F')
             add_anim(neurons_data, distance_data, som_ring, cities, raw_cities)
     
     #plot_som_tsp(cities, som_ring)
-    
+    print('\n\n\n\n')
     init_anim(cities)
     ani = anim.FuncAnimation(fig, animate, frames=len(neurons_data), fargs=(neurons_data,distance_data,))
     
