@@ -3,12 +3,12 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as anim
 
 """What remains:
-2. static, linear and exponential decay functions for learning rate and neighbourhood radius
-3. enable diagram generation for the report (3 for each problem set, best run)
+1. enable diagram generation for the report (3 for each problem set, best run)
+2. sys.argv support
 """
 
 # for animation
-fig = plt.figure()
+fig = plt.figure(1)
 ax = plt.axes(xlim=(-0.2,1.2), ylim=(-0.2,1.2))
 cities_plt, = ax.plot([], [], 'ro', zorder=2, alpha=0.4)
 neurons_plt, = ax.plot([], [], 'yo-', zorder=1)
@@ -35,17 +35,22 @@ def get_problem_set(filename):
 
     return inp, inp_norm
 
-def plot_som_tsp(cities, neurons):
+def plot_som_tsp(cities, raw_cities, neurons, fname):
+    plt.figure(2)
+    plt.clf()
     x0 = [city[0] for city in cities]
     y0 = [city[1] for city in cities]
-    plt.plot(x0, y0, 'ro')
     x1 = [neuron[0] for neuron in neurons]
     y1 = [neuron[1] for neuron in neurons]
     x1.append(x1[0])
     y1.append(y1[0])
-
-    plt.plot(x1, y1, 'yo-')
-    plt.show()
+    d = calculate_total_distance(neurons, cities, raw_cities)
+    ax2 = plt.axes(xlim=(-0.2,1.2), ylim=(-0.2,1.2))
+    cities_plt2, = ax2.plot(x0, y0, 'ro', zorder=2, alpha=0.4)
+    neurons_plt2, = ax2.plot(x1, y1, 'yo-', zorder=1)
+    distance_text2 = ax2.text(-0.1, -0.1, "Distance: %0.4f" %d, transform=ax.transAxes)
+    plt.savefig("./plots/%s" %fname)
+    plt.figure(1)
 
 def init_anim(cities):
     cities_plt.set_data([], [])
@@ -144,7 +149,7 @@ def exponential_decay(initial, itr, factor):
 
 def main():
     #initialization
-    files = ("wi29.tsp", "dj38.tsp", "qa194.tsp", "uy734.tsp")
+    files = ("sets/wi29.tsp", "sets/dj38.tsp", "sets/qa194.tsp", "sets/uy734.tsp")
     tspfile = files[2]
     raw_cities, cities = get_problem_set(tspfile)
     #som_ring = [[random.random() for i in range(2)] for i in range(len(cities))]
@@ -158,13 +163,14 @@ def main():
     init_delta = 6.2*2 + 0.037*2*len(cities) #neighbourhood radius
     delta = init_delta
     n_iterations = 100*len(cities)
-    decay_type = 2
+    decay_type = 1
     frame_step = len(cities)
     
     # for animation plot
     neurons_data = []
     distance_data = []
     add_anim(neurons_data, distance_data, som_ring, cities, raw_cities)
+    #plot_som_tsp(cities, raw_cities, som_ring, "start.png")
     
     for i in range(n_iterations):
         #city = random.choice(cities)
@@ -201,14 +207,15 @@ def main():
         if (i+1) % frame_step == 0:
             print_diagnostics(i, n_iterations, eta, delta)
             add_anim(neurons_data, distance_data, som_ring, cities, raw_cities)
-    
+
+    #plot_som_tsp(cities, raw_cities, som_ring, "end.png")
     init_anim(cities)
     ani = anim.FuncAnimation(fig, animate, frames=len(neurons_data), fargs=(neurons_data,distance_data,))
     
     plt.show()
     try:
         print("Saving video...")
-        ani.save("tsp_%s.mp4" %(tspfile), fps=15, bitrate=1000)
+        ani.save("./animations/%s.mp4" %(tspfile[5:-4]), fps=15, bitrate=1000)
         print("Done!")
     except:
         print("probably need to install ffmpeg or some encoders")
