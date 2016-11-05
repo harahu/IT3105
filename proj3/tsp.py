@@ -137,6 +137,8 @@ def print_diagnostics(i, n_iterations, eta, delta):
     print("Progress: %i%%" %(round(100*i/n_iterations)))
     print("Eta: %f" %(eta))
     print("Delta: %f" %(delta), end='\033[F\033[F')
+    if i == n_iterations-1:
+        print('\n\n\n----------')
 
 def main():
     #initialization
@@ -191,13 +193,11 @@ def main():
             #implement
             pass
 
-        if i % frame_step == 0:
+        if (i+1) % frame_step == 0:
             print_diagnostics(i, n_iterations, eta, delta)
             add_anim(neurons_data, distance_data, som_ring, cities, raw_cities)
     
     #plot_som_tsp(cities, som_ring)
-    print_diagnostics(n_iterations, n_iterations, eta, delta)
-    print('\n\n\n----------')
     init_anim(cities)
     ani = anim.FuncAnimation(fig, animate, frames=len(neurons_data), fargs=(neurons_data,distance_data,))
     
