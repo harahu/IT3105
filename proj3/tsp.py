@@ -133,14 +133,12 @@ def calculate_total_distance(som_ring, cities, raw_cities):
     closest_list = [list(cty) for cty in get_closest_city_list(som_ring, cities)]
     closest_list = [cty for cty in closest_list if len(cty) != 0]
     
-    processed_cities = [closest_list[0][0]]
     last_city = closest_list[0][0]
     for city_list in closest_list:
         for city in city_list:
-            if city not in processed_cities:
-                total_distance += euclidian_distance(raw_cities[city], raw_cities[last_city])
-                last_city = city
-    total_distance += euclidian_distance(raw_cities[processed_cities[0]], raw_cities[last_city])
+            total_distance += euclidian_distance(raw_cities[city], raw_cities[last_city])
+            last_city = city
+    total_distance += euclidian_distance(raw_cities[closest_list[0][0]], raw_cities[last_city])
     
     return total_distance
     
@@ -231,6 +229,8 @@ def main():
     #plot_som_tsp(cities, raw_cities, som_ring, "end.png")
     init_anim(cities)
     ani = anim.FuncAnimation(fig, animate, frames=len(neurons_data), fargs=(neurons_data,distance_data,delta_data,))
+    
+    print("Final distance: %.4f" %(distance_data[-1]))
     
     plt.show()
     try:
