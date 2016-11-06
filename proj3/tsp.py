@@ -104,33 +104,26 @@ def get_best_match_index(city, neurons, disregard):
 
 # Returns list of the closest cities per neuron
 def get_closest_city_list(som_ring, cities):
-    closest_list = [set() for i in range(len(som_ring))]
+    closest_list = [None] * len(som_ring)
     
-    # Add closest city to each neuron
-    for neuron_index in range(len(som_ring)):
-        closest_city = get_best_match_index(som_ring[neuron_index], cities, [])
-        closest_list[neuron_index].add(closest_city)
-    
-    # Add closest neuron for each city (if more than one city has the same neuron as closest)
+    # Add closest neuron for each city
     for city_index in range(len(cities)):
         closest_neuron = get_best_match_index(cities[city_index], som_ring, [])
-        closest_list[closest_neuron].add(city_index)
+        closest_list[closest_neuron] = city_index
     
     return closest_list
 
 def calculate_total_distance(som_ring, cities, raw_cities):
     total_distance = 0
-    closest_list = [list(cty) for cty in get_closest_city_list(som_ring, cities)]
+    closest_list = get_closest_city_list(som_ring, cities)
+    closest_list = [cty for cty in closest_list if cty != None] # filter None neurons
     
-    processed_cities = [closest_list[0][0]]
-    last_city = closest_list[0][0]
-    for city_list in closest_list:
-        for city in city_list:
-            if city not in processed_cities:
-                total_distance += euclidian_distance(raw_cities[city], raw_cities[last_city])
-                last_city = city
+    last_city = closest_list[0]
+    for city in closest_list:
+        total_distance += euclidian_distance(raw_cities[city], raw_cities[last_city])
+        last_city = city
     
-    total_distance += euclidian_distance(raw_cities[processed_cities[0]], raw_cities[last_city])
+    total_distance += euclidian_distance(raw_cities[closest_list[0]], raw_cities[last_city])
     
     return total_distance
     
@@ -151,7 +144,7 @@ def exponential_decay(initial, itr, factor):
 def main():
     #initialization
     files = ("sets/wi29.tsp", "sets/dj38.tsp", "sets/qa194.tsp", "sets/uy734.tsp")
-    tspfile = files[3]
+    tspfile = files[2]
     raw_cities, cities = get_problem_set(tspfile)
     #som_ring = [[random.random() for i in range(2)] for i in range(len(cities))]
     som_ring = []
