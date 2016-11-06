@@ -39,6 +39,7 @@ def get_problem_set(filename):
     return inp, inp_norm
 
 def plot_som_tsp(cities, raw_cities, neurons, fname):
+    """Create and save plot of current state"""
     plt.figure(2)
     plt.clf()
     x0 = [city[0] for city in cities]
@@ -56,6 +57,7 @@ def plot_som_tsp(cities, raw_cities, neurons, fname):
     plt.figure(1)
 
 def init_anim(cities):
+    """Initialize cities plot"""
     cities_plt.set_data([], [])
     
     x = [city[0] for city in cities]
@@ -63,6 +65,7 @@ def init_anim(cities):
     cities_plt.set_data(x, y)
 
 def animate(i, neurons, distances, deltas):
+    """Create plot for frame i"""
     neurons_plt.set_data([], [])
     
     x = neurons[i][0]
@@ -74,6 +77,7 @@ def animate(i, neurons, distances, deltas):
     return cities_plt, neurons_plt, distance_text, delta_text
 
 def add_anim(neurons_data, distance_data, delta_data, delta, neurons, cities, raw_cities):
+    """Add frame to animation"""
     x = [neuron[0] for neuron in neurons]
     y = [neuron[1] for neuron in neurons]
     
@@ -102,6 +106,7 @@ def euclidian_potential(a, b):
     return (x*x)+(y*y)
 
 def get_best_match_index(city, neurons, disregard):
+    """Returns index of neuron not in disregard closest to city"""
     best = 0
     potential = []
     for n in neurons:
@@ -167,23 +172,35 @@ def main():
     pick_list = cities[:]
     inhibit = []
     n_neurons = int(len(cities)*1.5)
+    
+    # Create initial circular position of nodes
     for i in range(n_neurons):
         tetha = i / n_neurons * 2 * math.pi
         som_ring.append([math.cos(tetha)/3 + 0.5, math.sin(tetha)/3 + 0.5])
+    
+    # Init variables
     init_eta = 0.8 #learning rate
     init_delta = 6.2 + 0.037*len(som_ring) #neighbourhood radius
     if len(sys.argv) > 3:
-        init_eta = float(sys.argv[3])
-        init_delta = float(sys.argv[4])
+        try:
+            init_eta = float(sys.argv[3])
+            init_delta = float(sys.argv[4])
+        except ValueError:
+            print("Usage: python tsp.py [file] [decay type] [learning rate] [initial delta]")
     eta = init_eta
     delta = init_delta
     n_iterations = 50*len(som_ring)
+    
+    # Set decay type
     decay_type = 1
     if len(sys.argv) > 2:
-        decay_type = int(sys.argv[2])
+        try:
+            decay_type = int(sys.argv[2])
+        except ValueError:
+            print("Usage: python tsp.py [file] [decay type] [learning rate] [initial delta]")
     frame_step = len(cities)
     
-    # for animation plot
+    # Variables used for animation plot
     neurons_data = []
     distance_data = []
     delta_data = []
@@ -235,6 +252,7 @@ def main():
     
     print("Final distance: %.4f" %(distance_data[-1]))
     
+    # Show animation and save video
     plt.show()
     try:
         print("Saving video...")
