@@ -169,12 +169,12 @@ def main():
     n_neurons = int(len(cities)*1.5)
     for i in range(n_neurons):
         tetha = i / n_neurons * 2 * math.pi
-        som_ring.append([math.cos(tetha)/4 + 0.5, math.sin(tetha)/4 + 0.5])
+        som_ring.append([math.cos(tetha)/3 + 0.5, math.sin(tetha)/3 + 0.5])
     init_eta = 0.8 #learning rate
     init_delta = 6.2 + 0.037*len(som_ring) #neighbourhood radius
     if len(sys.argv) > 3:
         init_eta = float(sys.argv[3])
-        init_delta = float(sys.argv[4]) + 0.037*len(cities)
+        init_delta = float(sys.argv[4])
     eta = init_eta
     delta = init_delta
     n_iterations = 50*len(som_ring)
