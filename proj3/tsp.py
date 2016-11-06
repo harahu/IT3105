@@ -103,15 +103,17 @@ def euclidian_potential(a, b):
 
 def get_best_match_index(city, neurons, disregard):
     best = 0
-    best_pot = euclidian_potential(city, neurons[0])
+    potential = []
+    for n in neurons:
+        potential.append(euclidian_potential(city, n))
+    for d in disregard:
+        potential[d] = 1000000000
+    best_pot = potential[0]
 
     for i in range(1, len(neurons)):
-        if i in disregard:
-            continue
-        potential = euclidian_potential(city, neurons[i])
-        if potential < best_pot:
+        if potential[i] < best_pot:
             best = i
-            best_pot = potential
+            best_pot = potential[i]
             
     return best
 
