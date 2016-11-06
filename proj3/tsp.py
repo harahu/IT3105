@@ -138,7 +138,6 @@ def calculate_total_distance(som_ring, cities, raw_cities):
     for city_list in closest_list:
         for city in city_list:
             if city not in processed_cities:
-                cities_counted += 1
                 total_distance += euclidian_distance(raw_cities[city], raw_cities[last_city])
                 last_city = city
     total_distance += euclidian_distance(raw_cities[processed_cities[0]], raw_cities[last_city])
