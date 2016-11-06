@@ -146,7 +146,7 @@ def main():
     #initialization
     files = ("sets/wi29.tsp", "sets/dj38.tsp", "sets/qa194.tsp", "sets/uy734.tsp")
     tspfile = files[2]
-    if len(sys.argv) == 2:
+    if len(sys.argv) > 1:
         tspfile = sys.argv[1]
     raw_cities, cities = get_problem_set(tspfile)
     #som_ring = [[random.random() for i in range(2)] for i in range(len(cities))]
@@ -163,6 +163,8 @@ def main():
     delta = init_delta
     n_iterations = 100*len(cities)
     decay_type = 1
+    if len(sys.argv) > 2:
+        decay_type = int(sys.argv[2])
     frame_step = len(cities)
     
     # for animation plot
@@ -216,7 +218,7 @@ def main():
     plt.show()
     try:
         print("Saving video...")
-        ani.save("./animations/%s.mp4" %(tspfile[5:-4]), fps=15, bitrate=1000)
+        ani.save("./animations/%s_%i.mp4" %(tspfile[5:-4], decay_type), fps=15, bitrate=1000)
         print("Done!")
     except:
         print("probably need to install ffmpeg or some encoders")
