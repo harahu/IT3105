@@ -159,11 +159,10 @@ def exponential_decay(initial, itr, factor):
 def main():
     #initialization
     files = ("sets/wi29.tsp", "sets/dj38.tsp", "sets/qa194.tsp", "sets/uy734.tsp")
-    tspfile = files[2]
+    tspfile = files[3]
     if len(sys.argv) > 1:
         tspfile = sys.argv[1]
     raw_cities, cities = get_problem_set(tspfile)
-    #som_ring = [[random.random() for i in range(2)] for i in range(len(cities))]
     som_ring = []
     pick_list = cities[:]
     inhibit = []
@@ -178,7 +177,7 @@ def main():
         init_delta = float(sys.argv[4]) + 0.037*len(cities)
     eta = init_eta
     delta = init_delta
-    n_iterations = 100*len(cities)
+    n_iterations = 50*len(som_ring)
     decay_type = 1
     if len(sys.argv) > 2:
         decay_type = int(sys.argv[2])
