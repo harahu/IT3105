@@ -172,8 +172,11 @@ def main():
         tetha = i / n_neurons * 2 * math.pi
         som_ring.append([math.cos(tetha)/4 + 0.5, math.sin(tetha)/4 + 0.5])
     init_eta = 0.8 #learning rate
+    init_delta = 6.2 + 0.037*len(cities) #neighbourhood radius
+    if len(sys.argv) > 3:
+        init_eta = float(sys.argv[3])
+        init_delta = float(sys.argv[4]) + 0.037*len(cities)
     eta = init_eta
-    init_delta = 6.2*2 + 0.037*2*len(cities) #neighbourhood radius
     delta = init_delta
     n_iterations = 100*len(cities)
     decay_type = 1
