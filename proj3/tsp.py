@@ -38,7 +38,7 @@ def get_problem_set(filename):
 
     return inp, inp_norm
 
-def plot_som_tsp(cities, raw_cities, neurons, fname):
+def plot_som_tsp(cities, raw_cities, neurons, fname, cur_iter, max_iter):
     """Create and save plot of current state"""
     plt.figure(2)
     plt.clf()
@@ -53,6 +53,7 @@ def plot_som_tsp(cities, raw_cities, neurons, fname):
     cities_plt2, = ax2.plot(x0, y0, 'ro', zorder=2, alpha=0.4)
     neurons_plt2, = ax2.plot(x1, y1, 'yo-', zorder=1)
     distance_text2 = ax2.text(-0.1, -0.1, "Distance: %0.4f" %d, transform=ax2.transAxes)
+    iter_text = ax2.text(0.3, -0.1, "Iteration: %i / %i" %(cur_iter, max_iter), transform=ax2.transAxes)
     plt.savefig("./plots/%s" %fname)
     plt.figure(1)
 
@@ -205,7 +206,7 @@ def main():
     distance_data = []
     delta_data = []
     add_anim(neurons_data, distance_data, delta_data, delta, som_ring, cities, raw_cities)
-    plot_som_tsp(cities, raw_cities, som_ring, "%s_%i_start.png" %(tspfile[5:-4], decay_type))
+    plot_som_tsp(cities, raw_cities, som_ring, "%s_%i_start.png" %(tspfile[5:-4], decay_type), 1, n_iterations)
     
     for i in range(n_iterations):
         if i % len(cities) == 0:
@@ -247,10 +248,10 @@ def main():
             add_anim(neurons_data, distance_data, delta_data, delta, som_ring, cities, raw_cities)
         
         if i == int(n_iterations/2):
-            plot_som_tsp(cities, raw_cities, som_ring, "%s_%i_middle.png" %(tspfile[5:-4], decay_type))
+            plot_som_tsp(cities, raw_cities, som_ring, "%s_%i_middle.png" %(tspfile[5:-4], decay_type), i+1, n_iterations)
             pass
 
-    plot_som_tsp(cities, raw_cities, som_ring, "%s_%i_end.png" %(tspfile[5:-4], decay_type))
+    plot_som_tsp(cities, raw_cities, som_ring, "%s_%i_end.png" %(tspfile[5:-4], decay_type), i+1, n_iterations)
     init_anim(cities)
     ani = anim.FuncAnimation(fig, animate, frames=len(neurons_data), fargs=(neurons_data,distance_data,delta_data,))
     
@@ -258,12 +259,13 @@ def main():
     
     # Show animation and save video
     plt.show()
+    """
     try:
         print("Saving video...")
         ani.save("./animations/%s_%i.mp4" %(tspfile[5:-4], decay_type), fps=15, bitrate=1000)
         print("Done!")
     except:
         print("probably need to install ffmpeg or some encoders")
-
+"""
 if __name__ == '__main__':
     main()
