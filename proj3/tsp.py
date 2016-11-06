@@ -32,6 +32,11 @@ def get_problem_set(filename):
 
     inp_norm = [[(city[0]-min_x)/(max_x-min_x), (city[1]-min_y)/(max_y-min_y)] for city in inp]
 
+    for city in inp:
+        city.reverse()
+    for city in inp_norm:
+        city.reverse()
+
     return inp, inp_norm
 
 def plot_som_tsp(cities, raw_cities, neurons, fname):
@@ -86,10 +91,14 @@ def print_diagnostics(i, n_iterations, eta, delta):
         print('\n\n\n----------')
 
 def euclidian_distance(a, b):
-    return math.sqrt(((a[0]-b[0])**2)+((a[1]-b[1])**2))
+    x = a[0]-b[0]
+    y = a[1]-b[1]
+    return math.sqrt((x*x)+(y*y))
 
 def euclidian_potential(a, b):
-    return ((a[0]-b[0])**2)+((a[1]-b[1])**2)
+    x = a[0]-b[0]
+    y = a[1]-b[1]
+    return (x*x)+(y*y)
 
 def get_best_match_index(city, neurons, disregard):
     best = 0
@@ -156,7 +165,7 @@ def main():
     n_neurons = len(cities)*2
     for i in range(n_neurons):
         tetha = i / n_neurons * 2 * math.pi
-        som_ring.append([math.cos(tetha)/2 + 0.5, math.sin(tetha)/2 + 0.5])
+        som_ring.append([math.cos(tetha)/4 + 0.5, math.sin(tetha)/4 + 0.5])
     init_eta = 0.8 #learning rate
     eta = init_eta
     init_delta = 6.2*2 + 0.037*2*len(cities) #neighbourhood radius
