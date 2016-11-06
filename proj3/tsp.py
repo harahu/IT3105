@@ -3,7 +3,6 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as anim
 
 """What remains:
-1. enable diagram generation for the report (3 for each problem set, best run)
 2. sys.argv support
 """
 
@@ -48,7 +47,7 @@ def plot_som_tsp(cities, raw_cities, neurons, fname):
     ax2 = plt.axes(xlim=(-0.2,1.2), ylim=(-0.2,1.2))
     cities_plt2, = ax2.plot(x0, y0, 'ro', zorder=2, alpha=0.4)
     neurons_plt2, = ax2.plot(x1, y1, 'yo-', zorder=1)
-    distance_text2 = ax2.text(-0.1, -0.1, "Distance: %0.4f" %d, transform=ax.transAxes)
+    distance_text2 = ax2.text(-0.1, -0.1, "Distance: %0.4f" %d, transform=ax2.transAxes)
     plt.savefig("./plots/%s" %fname)
     plt.figure(1)
 
@@ -89,12 +88,14 @@ def print_diagnostics(i, n_iterations, eta, delta):
 def euclidian_distance(a, b):
     return math.sqrt(((a[0]-b[0])**2)+((a[1]-b[1])**2))
 
-def get_best_match_index(city, neuron_list):
+def get_best_match_index(city, neurons, disregard):
     best = 0
     best_dist = 10
 
-    for i in range(len(neuron_list)):
-        distance = euclidian_distance(city, neuron_list[i])
+    for i in range(len(neurons)):
+        if i in disregard:
+            continue
+        distance = euclidian_distance(city, neurons[i])
         if distance < best_dist:
             best = i
             best_dist = distance
@@ -107,12 +108,12 @@ def get_closest_city_list(som_ring, cities):
     
     # Add closest city to each neuron
     for neuron_index in range(len(som_ring)):
-        closest_city = get_best_match_index(som_ring[neuron_index], cities)
+        closest_city = get_best_match_index(som_ring[neuron_index], cities, [])
         closest_list[neuron_index].add(closest_city)
     
     # Add closest neuron for each city (if more than one city has the same neuron as closest)
     for city_index in range(len(cities)):
-        closest_neuron = get_best_match_index(cities[city_index], som_ring)
+        closest_neuron = get_best_match_index(cities[city_index], som_ring, [])
         closest_list[closest_neuron].add(city_index)
     
     return closest_list
@@ -154,6 +155,9 @@ def main():
     raw_cities, cities = get_problem_set(tspfile)
     #som_ring = [[random.random() for i in range(2)] for i in range(len(cities))]
     som_ring = []
+    pick_list = cities[:]
+    inhibit = []
+    inhibit_store = [[] for i in range(3)]
     n_neurons = len(cities)*2
     for i in range(n_neurons):
         tetha = i / n_neurons * 2 * math.pi
@@ -173,10 +177,12 @@ def main():
     #plot_som_tsp(cities, raw_cities, som_ring, "start.png")
     
     for i in range(n_iterations):
-        #city = random.choice(cities)
-        city = cities[i%len(cities)]
-        match = get_best_match_index(city, som_ring)
-
+        if i % len(cities) == 0:
+            random.shuffle(pick_list)
+            inhibit = []
+        city = pick_list[i%len(cities)]
+        match = get_best_match_index(city, som_ring, inhibit)
+        dinhibit.append(match)
         #train
         train(som_ring[match], city, eta, 1)
         for distance in range(1, math.ceil(delta)):
