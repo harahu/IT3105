@@ -237,8 +237,8 @@ def main():
                 delta = 1
         elif decay_type == 2:
             #exponential
-            eta = exponential_decay(init_eta, i, len(cities)*15)
-            delta = exponential_decay(init_delta, i, len(cities)*15)
+            eta = exponential_decay(init_eta, i, n_iterations/3)
+            delta = exponential_decay(init_delta, i, n_iterations/3)
             if delta < 1:
                 delta = 1
 
