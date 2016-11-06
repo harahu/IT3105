@@ -88,12 +88,12 @@ def print_diagnostics(i, n_iterations, eta, delta):
 def euclidian_distance(a, b):
     return math.sqrt(((a[0]-b[0])**2)+((a[1]-b[1])**2))
 
-def euclidian_protential(a, b):
+def euclidian_potential(a, b):
     return ((a[0]-b[0])**2)+((a[1]-b[1])**2)
 
 def get_best_match_index(city, neurons, disregard):
     best = 0
-    best_pot = euclidian_protential(city, neurons[0])
+    best_pot = euclidian_potential(city, neurons[0])
 
     for i in range(1, len(neurons)):
         if i in disregard:
