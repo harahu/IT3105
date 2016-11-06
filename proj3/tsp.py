@@ -88,17 +88,20 @@ def print_diagnostics(i, n_iterations, eta, delta):
 def euclidian_distance(a, b):
     return math.sqrt(((a[0]-b[0])**2)+((a[1]-b[1])**2))
 
+def euclidian_protential(a, b):
+    return ((a[0]-b[0])**2)+((a[1]-b[1])**2)
+
 def get_best_match_index(city, neurons, disregard):
     best = 0
-    best_dist = 10
+    best_pot = euclidian_protential(city, neurons[0])
 
-    for i in range(len(neurons)):
+    for i in range(1, len(neurons)):
         if i in disregard:
             continue
-        distance = euclidian_distance(city, neurons[i])
-        if distance < best_dist:
+        potential = euclidian_potential(city, neurons[i])
+        if potential < best_pot:
             best = i
-            best_dist = distance
+            best_pot = potential
             
     return best
 
@@ -157,7 +160,6 @@ def main():
     som_ring = []
     pick_list = cities[:]
     inhibit = []
-    inhibit_store = [[] for i in range(3)]
     n_neurons = len(cities)*2
     for i in range(n_neurons):
         tetha = i / n_neurons * 2 * math.pi
