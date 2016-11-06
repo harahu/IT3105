@@ -205,7 +205,7 @@ def main():
     distance_data = []
     delta_data = []
     add_anim(neurons_data, distance_data, delta_data, delta, som_ring, cities, raw_cities)
-    #plot_som_tsp(cities, raw_cities, som_ring, "start.png")
+    plot_som_tsp(cities, raw_cities, som_ring, "%s_%i_start.png" %(tspfile[5:-4], decay_type))
     
     for i in range(n_iterations):
         if i % len(cities) == 0:
@@ -245,8 +245,12 @@ def main():
         if (i+1) % frame_step == 0:
             print_diagnostics(i, n_iterations, eta, delta)
             add_anim(neurons_data, distance_data, delta_data, delta, som_ring, cities, raw_cities)
+        
+        if i == int(n_iterations/2):
+            plot_som_tsp(cities, raw_cities, som_ring, "%s_%i_middle.png" %(tspfile[5:-4], decay_type))
+            pass
 
-    #plot_som_tsp(cities, raw_cities, som_ring, "end.png")
+    plot_som_tsp(cities, raw_cities, som_ring, "%s_%i_end.png" %(tspfile[5:-4], decay_type))
     init_anim(cities)
     ani = anim.FuncAnimation(fig, animate, frames=len(neurons_data), fargs=(neurons_data,distance_data,delta_data,))
     
