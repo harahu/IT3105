@@ -193,11 +193,13 @@ def main():
     
     for i in range(n_iterations):
         if i % len(cities) == 0:
+            #shuffles cities and clears inhibition for every pass through of the list
             random.shuffle(pick_list)
             inhibit = []
         city = pick_list[i%len(cities)]
         match = get_best_match_index(city, som_ring, inhibit)
         inhibit.append(match)
+
         #train
         train(som_ring[match], city, eta, 1)
         for distance in range(1, math.ceil(delta)):
@@ -222,9 +224,8 @@ def main():
             delta = exponential_decay(init_delta, i, len(cities)*15)
             if delta < 1:
                 delta = 1
-        else:
-            print('What are you even trying to do? -_-')
 
+        #document
         if (i+1) % frame_step == 0:
             print_diagnostics(i, n_iterations, eta, delta)
             add_anim(neurons_data, distance_data, delta_data, delta, som_ring, cities, raw_cities)
