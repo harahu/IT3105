@@ -10,6 +10,7 @@ ax = plt.axes(xlim=(-0.2,1.2), ylim=(-0.2,1.2))
 cities_plt, = ax.plot([], [], 'ro', zorder=2, alpha=0.4)
 neurons_plt, = ax.plot([], [], 'yo-', zorder=1)
 distance_text = ax.text(-0.1, -0.1, "", transform=ax.transAxes)
+delta_text = ax.text(0.3, -0.1, "", transform=ax.transAxes)
 
 def get_problem_set(filename):
     """Returns a list of city coordinates together with the 0,1-normalized version"""
@@ -61,7 +62,7 @@ def init_anim(cities):
     y = [city[1] for city in cities]
     cities_plt.set_data(x, y)
 
-def animate(i, neurons, distances):
+def animate(i, neurons, distances, deltas):
     neurons_plt.set_data([], [])
     
     x = neurons[i][0]
@@ -69,9 +70,10 @@ def animate(i, neurons, distances):
     
     neurons_plt.set_data(x, y)
     distance_text.set_text("Distance: %0.4f" %(distances[i]))
-    return cities_plt, neurons_plt, distance_text
+    delta_text.set_text("Delta: %0.4f" %(deltas[i]))
+    return cities_plt, neurons_plt, distance_text, delta_text
 
-def add_anim(neurons_data, distance_data, neurons, cities, raw_cities):
+def add_anim(neurons_data, distance_data, delta_data, delta, neurons, cities, raw_cities):
     x = [neuron[0] for neuron in neurons]
     y = [neuron[1] for neuron in neurons]
     
@@ -80,6 +82,7 @@ def add_anim(neurons_data, distance_data, neurons, cities, raw_cities):
     
     neurons_data.append((x,y))
     distance_data.append(calculate_total_distance(neurons, cities, raw_cities))
+    delta_data.append(delta)
 
 def print_diagnostics(i, n_iterations, eta, delta):
     print("Progress: %i%%" %(round(100*i/n_iterations)))
@@ -162,7 +165,7 @@ def main():
     som_ring = []
     pick_list = cities[:]
     inhibit = []
-    n_neurons = len(cities)*2
+    n_neurons = int(len(cities)*1.5)
     for i in range(n_neurons):
         tetha = i / n_neurons * 2 * math.pi
         som_ring.append([math.cos(tetha)/4 + 0.5, math.sin(tetha)/4 + 0.5])
@@ -179,7 +182,8 @@ def main():
     # for animation plot
     neurons_data = []
     distance_data = []
-    add_anim(neurons_data, distance_data, som_ring, cities, raw_cities)
+    delta_data = []
+    add_anim(neurons_data, distance_data, delta_data, delta, som_ring, cities, raw_cities)
     #plot_som_tsp(cities, raw_cities, som_ring, "start.png")
     
     for i in range(n_iterations):
@@ -218,11 +222,11 @@ def main():
 
         if (i+1) % frame_step == 0:
             print_diagnostics(i, n_iterations, eta, delta)
-            add_anim(neurons_data, distance_data, som_ring, cities, raw_cities)
+            add_anim(neurons_data, distance_data, delta_data, delta, som_ring, cities, raw_cities)
 
     #plot_som_tsp(cities, raw_cities, som_ring, "end.png")
     init_anim(cities)
-    ani = anim.FuncAnimation(fig, animate, frames=len(neurons_data), fargs=(neurons_data,distance_data,))
+    ani = anim.FuncAnimation(fig, animate, frames=len(neurons_data), fargs=(neurons_data,distance_data,delta_data,))
     
     plt.show()
     try:
