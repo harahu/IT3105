@@ -151,7 +151,7 @@ def exponential_decay(initial, itr, factor):
 def main():
     #initialization
     files = ("sets/wi29.tsp", "sets/dj38.tsp", "sets/qa194.tsp", "sets/uy734.tsp")
-    tspfile = files[2]
+    tspfile = files[3]
     raw_cities, cities = get_problem_set(tspfile)
     #som_ring = [[random.random() for i in range(2)] for i in range(len(cities))]
     som_ring = []
@@ -182,7 +182,7 @@ def main():
             inhibit = []
         city = pick_list[i%len(cities)]
         match = get_best_match_index(city, som_ring, inhibit)
-        dinhibit.append(match)
+        inhibit.append(match)
         #train
         train(som_ring[match], city, eta, 1)
         for distance in range(1, math.ceil(delta)):
