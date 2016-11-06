@@ -1,10 +1,8 @@
 import math, random
 import matplotlib.pyplot as plt
 import matplotlib.animation as anim
+import sys
 
-"""What remains:
-2. sys.argv support
-"""
 
 # for animation
 fig = plt.figure(1)
@@ -148,6 +146,8 @@ def main():
     #initialization
     files = ("sets/wi29.tsp", "sets/dj38.tsp", "sets/qa194.tsp", "sets/uy734.tsp")
     tspfile = files[2]
+    if len(sys.argv) == 2:
+        tspfile = sys.argv[1]
     raw_cities, cities = get_problem_set(tspfile)
     #som_ring = [[random.random() for i in range(2)] for i in range(len(cities))]
     som_ring = []
