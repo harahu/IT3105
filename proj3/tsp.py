@@ -259,13 +259,12 @@ def main():
     
     # Show animation and save video
     plt.show()
-    """
     try:
         print("Saving video...")
         ani.save("./animations/%s_%i.mp4" %(tspfile[5:-4], decay_type), fps=15, bitrate=1000)
         print("Done!")
     except:
         print("probably need to install ffmpeg or some encoders")
-"""
+
 if __name__ == '__main__':
     main()
